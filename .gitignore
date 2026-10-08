@@ -1,0 +1,19 @@
+# ============================================================
+# Carona Alvinegra — .gitignore
+# ============================================================
+
+# --- Ferramenta DsCode (não faz parte do produto) ---
+# Ver decisoes.md §3 (estrutura) e §6 (pré-requisito operacional).
+dscode.cmd
+dscode.mjs
+node.exe
+node_modules/
+templates/
+.dscode/
+package-lock.json
+
+# Licença e NOTICE pertencem à ferramenta DsCode (lessweb/deepcode-cli),
+# não ao produto Carona Alvinegra. Remover estas duas linhas caso queira
+# manter uma licença própria no repo.
+LICENSE
+NOTICE
