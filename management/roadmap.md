@@ -19,16 +19,16 @@
 
 | # | Name | Status | References |
 |---|---|---|---|
-| 10 | fundacao-backend | planned | V5 |
-| 20 | modelo-dominio | planned | V5 |
-| 30 | autenticacao | planned | V4 |
-| 40 | crud-participantes-grupos | planned | V1 |
-| 50 | gestao-jogos | planned | V1 |
-| 60 | marcacao-pagamento | planned | V1 |
-| 70 | algoritmo-alocacao | planned | V2 |
-| 80 | lista-oficial | planned | V3 |
-| 90 | frontend-react | planned | V6 |
-| 100 | deploy | planned | V7 |
+| 10 | fundacao-backend | created | V5 |
+| 20 | modelo-dominio | created | V5 |
+| 30 | autenticacao | created | V4 |
+| 40 | crud-participantes-grupos | created | V1 |
+| 50 | gestao-jogos | created | V1 |
+| 60 | marcacao-pagamento | created | V1 |
+| 70 | algoritmo-alocacao | created | V2 |
+| 80 | lista-oficial | created | V3 |
+| 90 | frontend-react | created | V6 |
+| 100 | deploy | created | V7 |
 
 ---
 
