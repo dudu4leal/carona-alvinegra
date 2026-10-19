@@ -17,3 +17,7 @@ package-lock.json
 # manter uma licença própria no repo.
 LICENSE
 NOTICE
+
+# --- Backups automáticos do fluxo SDD (/spec-verify, /spec-audit) ---
+# São artefatos temporários de correção, não fazem parte dos specs.
+*.bak.*
