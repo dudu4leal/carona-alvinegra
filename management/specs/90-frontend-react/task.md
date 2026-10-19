@@ -99,7 +99,9 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Design References:** "Componente: Páginas"
 **Actions:**
 1. Criar `frontend/src/pages/PagamentosPage.tsx`.
-**Validation:** `tsc --noEmit` passa.
+2. Carregar `GET /api/participantes` + `GET /api/jogos/{id}/pagamentos`, cruzar por `participanteId` e renderizar uma linha por participante (nome + grupo) com estado pago/não pago (sem registro = não pago).
+3. Chamar `POST .../marcar-pago` e `POST .../desmarcar-pago`; ao desmarcar, ler `reembolsoDevido` e exibir o aviso correspondente ("reembolso devido" / "sem reembolso").
+**Validation:** `tsc --noEmit` passa; um participante sem registro pode ser marcado como pago e a linha atualiza; o aviso de reembolso reflete `reembolsoDevido`.
 **Status:** [ ] pending
 
 ### Task 10: Criar tela de Alocação
@@ -109,7 +111,8 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Design References:** "Componente: Páginas"
 **Actions:**
 1. Criar `frontend/src/pages/AlocacaoPage.tsx`.
-**Validation:** `tsc --noEmit` passa.
+2. Chamar `POST /api/jogos/{id}/alocar` e `GET /api/jogos/{id}/alocacao`, armazenando a resposta tipada como `Alocacao[]` (array com uma alocação por rota) e renderizando um bloco por item (rota, vans, spin opcional, grupos escalados). Não indexar o array como se fosse um objeto único.
+**Validation:** `tsc --noEmit` passa; a tela renderiza os dois blocos de rota quando a API retorna 2 alocações.
 **Status:** [ ] pending
 
 ### Task 11: Criar tela de Lista Oficial
@@ -129,6 +132,6 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Design References:** "Componente: components/Layout.tsx"
 **Actions:**
 1. Ajustar CSS responsivo.
-2. Executar `tsc --noEmit` e `npm run build`.
+2. Executar `npm run build`.
 **Validation:** Build termina com exit code 0.
 **Status:** [ ] pending

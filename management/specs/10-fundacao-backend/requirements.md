@@ -1,3 +1,9 @@
+---
+name: fundacao-backend
+status: audited
+references: V5
+---
+
 # Spec 10: Fundação do Backend — Requirements
 
 ## Value Delivery
@@ -35,7 +41,7 @@ Este spec cria a **estrutura física e a infraestrutura mínima** do backend: so
 - [ ] `CaronaAlvinegra.Application` referencia apenas `CaronaAlvinegra.Domain`.
 - [ ] `CaronaAlvinegra.Infrastructure` referencia `CaronaAlvinegra.Application` e `CaronaAlvinegra.Domain` (e nenhum projeto da camada API).
 - [ ] `CaronaAlvinegra.Api` referencia `CaronaAlvinegra.Application` e `CaronaAlvinegra.Infrastructure`.
-- [ ] `CaronaAlvinegra.Domain.Tests` referencia `CaronaAlvinegra.Domain`.
+- [ ] `CaronaAlvinegra.Domain.Tests` referencia `CaronaAlvinegra.Domain` **e** `CaronaAlvinegra.Application` (os testes de serviço dos Specs 30/40/50/60/70/110 vivem nesse projeto e usam tipos da Application).
 
 ### FR-003: Pacotes NuGet essenciais
 
@@ -81,9 +87,12 @@ Este spec cria a **estrutura física e a infraestrutura mínima** do backend: so
 **Acceptance Criteria:**
 - [ ] Arquivo `backend/src/CaronaAlvinegra.Api/Program.cs` existe.
 - [ ] `builder.Services.AddDbContext<ApplicationDbContext>(...)` usa `UseNpgsql(connectionString)`.
-- [ ] `builder.Services.AddControllers()`, `AddEndpointsApiExplorer()` e `AddSwaggerGen()` são chamados.
+- [ ] `builder.Services.AddControllers()` configura `AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))`, para que o enum `Rota` trafegue como string (`"Quitandinha"`/`"Bingen"`) — contrato exigido pelo Spec 90 (`type Rota = 'Quitandinha' | 'Bingen'`). Sem isso, o ASP.NET serializa `0`/`1` e rejeita as strings enviadas pelo frontend com 400.
+- [ ] `builder.Services.AddEndpointsApiExplorer()` e `AddSwaggerGen()` são chamados.
 - [ ] `app.UseSwagger()` e `app.UseSwaggerUI()` são chamados em desenvolvimento.
 - [ ] `app.MapControllers()` é chamado.
+- [ ] `builder.Services.AddCors(...)` e `app.UseCors(...)` configuram política permissiva (`AllowAnyOrigin`/`AllowAnyMethod`/`AllowAnyHeader`).
+- [ ] Existe `backend/src/CaronaAlvinegra.Api/Properties/launchSettings.json` com um perfil cujo `applicationUrl` é exatamente `http://localhost:5000` e `ASPNETCORE_ENVIRONMENT=Development`, para que `dotnet run --project backend/src/CaronaAlvinegra.Api` escute em `http://localhost:5000` — porta padrão assumida pelo `baseURL` do frontend (Spec 90).
 
 ### FR-007: Health check endpoint
 
@@ -144,7 +153,7 @@ Este spec cria a **estrutura física e a infraestrutura mínima** do backend: so
 ## Edge Cases & Error States
 
 - **PostgreSQL indisponível no startup:** a API NÃO deve falhar na inicialização só porque o banco está fora; `AddDbContext` só abre conexão na primeira query. O health check de liveness (`/health`) continua respondendo 200.
-- **Connection string ausente:** se `ConnectionStrings:DefaultConnection` não estiver definida, `UseNpgsql` deve receber `null` de forma segura em dev (usando o valor de `appsettings.Development.json`). Documentar que produção exige a variável de ambiente.
+- **Connection string ausente:** se `ConnectionStrings:DefaultConnection` não estiver definida em nenhuma fonte, `GetConnectionString("DefaultConnection")` retorna `null` e o registro do `DbContext` falha de forma clara na inicialização (exceção com mensagem). Em desenvolvimento, `appsettings.Development.json` fornece o valor local; em produção, a variável de ambiente `ConnectionStrings__DefaultConnection` é obrigatória.
 - **`dotnet ef` não instalado:** a execução de migrations é um passo manual do Spec 20; este spec apenas garante que o pacote/ferramenta está disponível e que o DbContext é resolvível via DI.
 
 ## Dependencies

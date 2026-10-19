@@ -37,9 +37,9 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Requirements Covered:** FR-002
 **Design References:** "Componente: GrupoRepository / ParticipanteRepository"
 **Actions:**
-1. Criar `backend/src/CaronaAlvinegra.Infrastructure/Repositories/GrupoRepository.cs`.
+1. Criar `backend/src/CaronaAlvinegra.Infrastructure/Repositories/GrupoRepository.cs` (com `.Include(g => g.Participantes)` em `GetByIdAsync` e `GetAllAsync`).
 2. Criar `backend/src/CaronaAlvinegra.Infrastructure/Repositories/ParticipanteRepository.cs` (incluindo `CountByGrupoAsync` e filtro por `grupoId`).
-**Validation:** `dotnet build backend/CaronaAlvinegra.sln` compila.
+**Validation:** `dotnet build backend/CaronaAlvinegra.sln` compila; `grep -n "Include" backend/src/CaronaAlvinegra.Infrastructure/Repositories/GrupoRepository.cs` retorna 2 ocorrências.
 **Status:** [ ] pending
 
 ### Task 4: Implementar GrupoService
@@ -111,7 +111,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Requirements Covered:** FR-010
 **Design References:** "Testing Strategy"
 **Actions:**
-1. Criar `backend/tests/CaronaAlvinegra.Domain.Tests/ParticipanteServiceTests.cs` (repositórios in-memory/mock).
+1. Criar `backend/tests/CaronaAlvinegra.Domain.Tests/ParticipanteServiceTests.cs` (fakes in-memory escritos à mão, sem pacote de mock — ver Spec 10).
 2. Testar 15 OK, 16º lança `DomainException`, excluir grupo com participantes retorna conflito.
 **Validation:** `dotnet test backend/tests/CaronaAlvinegra.Domain.Tests` termina com exit code 0.
 **Status:** [ ] pending

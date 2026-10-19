@@ -11,6 +11,9 @@ Modelar o domínio como **entidades puras C#** no projeto `CaronaAlvinegra.Domai
 - **`Rota` é um enum**, mapeado para o banco como `string` (mais legível que `int`).
 - **`Van` e `Spin` são entidades de capacidade fixa** (constantes 15 e 6), sem relação de alocação ainda — a alocação é responsabilidade do Spec 70.
 - **`DomainException`** é a exceção única para violações de regra de negócio.
+- **Integridade referencial no banco:** `Pagamento → Participante/Jogo` e `ListaEspera → Jogo` usam `OnDelete(Cascade)` (registros-filho não sobrevivem ao pai); `Grupo → Participante` usa `OnDelete(Restrict)` para impedir exclusão silenciosa de participantes (o Spec 40 responde 409 antes de chegar ao banco).
+- **Chave lógica de `Pagamento`:** índice único `(ParticipanteId, JogoId)` sustenta o upsert "marcar/desmarcar" do Spec 60 e impede duplicatas.
+- **`OnModelCreating` chama `base.OnModelCreating`**: necessário para que o Spec 30 (que troca a base por `IdentityDbContext`) continue mapeando as tabelas de Identity.
 
 ## Component / Module Breakdown
 
@@ -216,7 +219,14 @@ public class ListaEspera
 
 **Interface:** Classes `IEntityTypeConfiguration<T>` (ex.: `GrupoConfiguration`, `ParticipanteConfiguration`, etc.) registradas em `ApplicationDbContext.OnModelCreating`.
 
-**Internal Logic:** Define chaves, conversão de `Rota` (`HasConversion<string>()` ou `HasConversion<int>()`), `HasMaxLength` para strings, e relacionamento `Grupo` 1:N `Participante` (`HasOne<Grupo>().WithMany().HasForeignKey(p => p.GrupoId)`).
+**Internal Logic:** Cada entidade tem sua própria `IEntityTypeConfiguration<T>` (aplicadas via `ApplyConfigurationsFromAssembly`). Mapeamentos exatos:
+- **Chaves:** `Id` (Guid) é PK em todas as 7 tabelas (`Participantes`, `Grupos`, `Vans`, `Spins`, `Jogos`, `Pagamentos`, `ListasEspera`).
+- **`Rota`:** `HasConversion<string>()` + `HasMaxLength(20)` + `IsRequired()` em `Grupo`, `Van`, `Spin` e `ListaEspera`.
+- **Tamanhos:** `Participante.Nome` 100 / `WhatsApp` 20; `Grupo.Nome` 100; `Van.Motorista` 100; `Jogo.CompeticaoCodigo` 20 / `Adversario` 100 / `PontoEmbarque` 200. Todas `IsRequired()`.
+- **`Grupo` 1:N `Participante`:** `HasMany(g => g.Participantes).WithOne().HasForeignKey(p => p.GrupoId).OnDelete(Restrict)` (impede exclusão silenciosa; o Spec 40 responde 409) e `Navigation(...).UsePropertyAccessMode(Field)` para popular a lista privada `_participantes`.
+- **`Pagamento`:** FKs `ParticipanteId → Participantes.Id` e `JogoId → Jogos.Id`, ambas `OnDelete(Cascade)`; índice **único** `(ParticipanteId, JogoId)` (garante a chave lógica do upsert do Spec 60).
+- **`ListaEspera`:** FK `JogoId → Jogos.Id` `OnDelete(Cascade)`; `ParticipanteIds` mapeado pelo **campo** `_participanteIds` (coluna `text`, `IsRequired`), com `HasConversion` JSON **e** `ValueComparer<List<Guid>>` (sem o comparer o EF não detecta mudanças na lista). A propriedade pública `ParticipanteIds` é ignorada pelo modelo (`Ignore`).
+- **`Van.ResponsavelId`:** Guid simples, **sem FK** para `Participante` nesta fase (a v1 não cria `Van`; a alocação usa `VanAlocada` no Spec 70).
 
 **Dependencies:** EF Core, entidades do domínio.
 
@@ -237,10 +247,10 @@ public class ListaEspera
 | Van | `Vans` | Id (PK), Rota, Motorista, ResponsavelId |
 | Spin | `Spins` | Id (PK), Rota |
 | Jogo | `Jogos` | Id (PK), CompeticaoCodigo, Adversario, Data, HorarioSaida, PontoEmbarque |
-| Pagamento | `Pagamentos` | Id (PK), ParticipanteId, JogoId, Pago |
-| ListaEspera | `ListasEspera` | Id (PK), JogoId, Rota, ParticipanteIds (JSON/coleção) |
+| Pagamento | `Pagamentos` | Id (PK), ParticipanteId (FK cascade), JogoId (FK cascade), Pago — índice único (ParticipanteId, JogoId) |
+| ListaEspera | `ListasEspera` | Id (PK), JogoId (FK cascade), Rota, ParticipanteIds (JSON/text) |
 
-> **Nota:** `ListaEspera.ParticipanteIds` é uma coleção de Guids. Para simplicidade, persistir como JSON (`HasConversion`) ou como entidade de junção — decisão de implementação no mapping; preferir a opção mais simples (KISS).
+> **Nota:** `ListaEspera.ParticipanteIds` é uma coleção de Guids persistida como **JSON** na coluna `text` `ParticipanteIds`, via `HasConversion` sobre o campo `_participanteIds`, com `ValueComparer<List<Guid>>` (opção mais simples, KISS).
 
 ## File / Module Layout
 

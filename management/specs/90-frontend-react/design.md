@@ -8,7 +8,7 @@ App SPA em **Vite + React + TypeScript**, consumindo a API REST. Estado local + 
 
 - **Vite** como build/dev server (rápido, padrão moderno).
 - **React Router** para navegação e rotas protegidas.
-- **Axios** (ou fetch wrapper) como cliente HTTP, com interceptor de token.
+- **Axios** como cliente HTTP, com interceptor de token.
 - **Token no `localStorage`**, removido no logout.
 - **CSS simples** (sem framework UI pesado), com layout responsivo.
 
@@ -18,7 +18,7 @@ App SPA em **Vite + React + TypeScript**, consumindo a API REST. Estado local + 
 
 **Purpose:** Cliente HTTP com token.
 
-**Interface:** `api.get/post/put/del` (instância axios ou wrapper fetch).
+**Interface:** `api.get/post/put/del` (instância axios).
 
 **Internal Logic:** `baseURL` de `import.meta.env.VITE_API_URL` (default `http://localhost:5000`). Interceptor adiciona `Authorization: Bearer <token>`; em resposta 401, limpa o token e redireciona para `/login`.
 
@@ -30,7 +30,7 @@ App SPA em **Vite + React + TypeScript**, consumindo a API REST. Estado local + 
 
 **Purpose:** Sessão do usuário.
 
-**Interface:** `{ user, token, login(email, senha), logout() }` via `useAuth()`.
+**Interface:** `{ token, login(email, senha), logout() }` via `useAuth()` (a presença do token em `localStorage` determina a autenticação).
 
 **Internal Logic:** `login` chama `POST /api/auth/login`, guarda o token em `localStorage` e no estado. `logout` limpa.
 
@@ -42,7 +42,7 @@ App SPA em **Vite + React + TypeScript**, consumindo a API REST. Estado local + 
 
 **Purpose:** Shell com menu e `Outlet` do Router.
 
-**Internal Logic:** Menu com links para Grupos, Participantes, Jogos, Pagamentos, Alocação, Lista e botão Sair. Rota protegida via `ProtectedRoute` que verifica token e redireciona para `/login`.
+**Internal Logic:** Menu com links para as telas e botão Sair. Rotas: `/grupos`, `/participantes`, `/jogos`, `/pagamentos`, `/alocacao`, `/lista` (protegidas via `ProtectedRoute`); `/login` é pública; `/` redireciona para `/grupos` (protegida). `ProtectedRoute` verifica o token e redireciona para `/login` sem token.
 
 **Dependencies:** `AuthContext`, React Router.
 
@@ -57,8 +57,8 @@ App SPA em **Vite + React + TypeScript**, consumindo a API REST. Estado local + 
 - `GruposPage`: tabela + form (nome, rota) + excluir (com tratamento de 409).
 - `ParticipantesPage`: tabela + form (nome, whatsapp, grupo) + excluir.
 - `JogosPage`: tabela + form (código, adversário, data, saída, embarque) + excluir.
-- `PagamentosPage`: seleção de jogo → lista de pagamentos + botões marcar/desmarcar.
-- `AlocacaoPage`: seleção de jogo → botão "Alocar" → exibe vans/spin/escalados.
+- `PagamentosPage`: seleção de jogo → carrega `GET /api/participantes` e `GET /api/jogos/{id}/pagamentos`, cruza por `participanteId` e exibe **uma linha por participante** (nome + grupo) com estado pago/não pago (ausência de registro = não pago) + botões marcar/desmarcar; ao desmarcar, mostra `reembolsoDevido`.
+- `AlocacaoPage`: seleção de jogo → botão "Alocar" → exibe `Alocacao[]` (um bloco por rota, com vans/spin/escalados/pendentes); `GET .../alocacao` também retorna array (404 → estado vazio, não erro).
 - `ListaPage`: seleção de jogo → botão "Gerar lista" → exibe texto + botão copiar.
 
 **Dependencies:** `api/client.ts`, DTOs/tipos.
@@ -69,7 +69,7 @@ App SPA em **Vite + React + TypeScript**, consumindo a API REST. Estado local + 
 
 **Purpose:** Tipos TypeScript espelhando os DTOs do backend.
 
-**Interface:** `Grupo`, `Participante`, `Jogo`, `Pagamento`, `Alocacao`, `VanAlocada`, `SpinAlocado`, `ListaOficial`.
+**Interface:** `Grupo`, `Participante`, `Jogo`, `Pagamento`, `DesmarcarPagamento`, `Alocacao`, `VanAlocada`, `SpinAlocado`, `ListaOficial`.
 
 **Internal Logic:** N/A.
 
@@ -93,7 +93,13 @@ interface Grupo { id: string; nome: string; rota: Rota; participantes: Participa
 interface Participante { id: string; nome: string; whatsApp: string; grupoId: string; }
 interface Jogo { id: string; competicaoCodigo: string; adversario: string; data: string; horarioSaida: string; pontoEmbarque: string; }
 interface VanAlocada { id: string; motorista: string; responsavelId: string; grupoIds: string[]; ocupacao: number; }
-interface Alocacao { id: string; jogoId: string; rota: Rota; vans: VanAlocada[]; spin?: SpinAlocado | null; gruposEscalados: string[]; }
+interface SpinAlocado { id: string; grupoIds: string[]; ocupacao: number; }
+interface Alocacao { id: string; jogoId: string; rota: Rota; vans: VanAlocada[]; spin?: SpinAlocado | null; gruposEscalados: string[]; gruposPendentes: string[]; }
+// GET/POST /api/jogos/{id}/alocar|alocacao retornam Alocacao[] (uma por rota: Quitandinha, Bingen)
+type AlocacaoLista = Alocacao[];
+interface Pagamento { id: string; participanteId: string; jogoId: string; pago: boolean; }
+interface DesmarcarPagamento { reembolsoDevido: boolean; }
+interface ListaOficial { texto: string; }
 ```
 
 ## File / Module Layout
@@ -123,7 +129,7 @@ frontend/
 
 ## Testing Strategy
 
-- **Build/typecheck:** `tsc --noEmit` e `vite build` com exit code 0 (validação principal).
+- **Build/typecheck:** `npm run build` com exit code 0 (validação principal; o script do Vite já inclui typecheck).
 - **Testes manuais:** login, CRUD de cada tela, alocação e cópia da lista.
 - Testes de componente (Vitest/RTL) são opcionais na v1 (KISS); não bloqueiam.
 

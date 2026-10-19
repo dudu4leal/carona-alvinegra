@@ -1,3 +1,9 @@
+---
+name: autenticacao
+status: verified
+references: V4
+---
+
 # Spec 30: Autenticação — Requirements
 
 ## Value Delivery
@@ -33,12 +39,12 @@ Este spec adiciona **ASP.NET Core Identity** (login/senha) e **JWT** à API, exp
 
 ### FR-003: Configuração do Identity
 
-**What:** Registrar Identity no `Program.cs` com `AddIdentityCore<IdentityUser>` (ou equivalente) e uma política de senha mínima razoável.
+**What:** Registrar Identity no `Program.cs` com `AddIdentityCore<IdentityUser>` e uma política de senha mínima (6 caracteres, sem regras complexas).
 
 **Why:** Habilita `UserManager<IdentityUser>` e o hash de senha para login.
 
 **Acceptance Criteria:**
-- [ ] `Program.cs` registra `UserManager<IdentityUser>` e o sign-in manager (se usado) no contêiner de DI.
+- [ ] `Program.cs` registra `UserManager<IdentityUser>` no contêiner de DI.
 - [ ] Política de senha configurada (mín. 6 caracteres; sem regras complexas para não travar o uso).
 
 ### FR-004: Configuração do JWT Bearer
@@ -84,6 +90,8 @@ Este spec adiciona **ASP.NET Core Identity** (login/senha) e **JWT** à API, exp
 - [ ] A inicialização da API cria o usuário `SeedAdmin:Email` se ele ainda não existir.
 - [ ] A senha vem de `SeedAdmin:Password` (nunca hardcoded em código).
 - [ ] O processo de seed é idempotente (não duplica usuário).
+- [ ] O método de seed é exatamente `SeedAdminUserAsync(IServiceProvider)`, declarado em `backend/src/CaronaAlvinegra.Api/` e chamado no `Program.cs` após `builder.Build()` (nome usado como contrato pelo Spec 100).
+- [ ] `backend/src/CaronaAlvinegra.Api/appsettings.json` contém `Jwt:Issuer`, `Jwt:Audience` e `Jwt:ExpirationMinutes` (valores não secretos: `CaronaAlvinegra`, `CaronaAlvinegra`, `480`), sem `Jwt:Key`.
 
 ### FR-008: Proteção das rotas
 
@@ -93,7 +101,7 @@ Este spec adiciona **ASP.NET Core Identity** (login/senha) e **JWT** à API, exp
 
 **Acceptance Criteria:**
 - [ ] `GET /health` e `POST /api/auth/login` permanecem acessíveis sem token.
-- [ ] Existe um mecanismo padrão (ex.: `[Authorize]` global ou por controller) que protege os controllers de domínio criados nos specs futuros.
+- [ ] `app.MapControllers().RequireAuthorization()` protege todos os controllers por padrão; o `AuthController` usa `[AllowAnonymous]`.
 
 ### FR-009: Migration das tabelas de Identity
 
@@ -102,7 +110,7 @@ Este spec adiciona **ASP.NET Core Identity** (login/senha) e **JWT** à API, exp
 **Why:** Persistir usuários (`AspNetUsers`) no PostgreSQL.
 
 **Acceptance Criteria:**
-- [ ] Uma migration (ex.: `AddIdentity`) existe sob `backend/src/CaronaAlvinegra.Infrastructure/Migrations/` incluindo as tabelas de Identity.
+- [ ] A migration `AddIdentity` existe sob `backend/src/CaronaAlvinegra.Infrastructure/Migrations/` incluindo as tabelas de Identity.
 - [ ] `dotnet build backend/CaronaAlvinegra.sln` termina com exit code 0.
 
 ### FR-010: Testes de autenticação

@@ -1,3 +1,9 @@
+---
+name: lista-oficial
+status: verified
+references: V3
+---
+
 # Spec 80: Geração da Lista Oficial — Requirements
 
 ## Value Delivery
@@ -31,7 +37,7 @@ Este spec gera a **lista oficial** (texto copiável para o WhatsApp) a partir do
 - [ ] Contém o `CompeticaoCodigo` (ex.: `BR-26`).
 - [ ] Contém `Data: {dia}-{mes}, {diaDaSemana}` (ex.: `Data: 7-10, Quarta`).
 - [ ] Contém `Saída, {HorarioSaida}` (ex.: `Saída, 17:00`).
-- [ ] Contém `Embarque: {PontoEmbarque}`.
+- [ ] Contém `Embarque: {PontoEmbarque} ✈️`.
 - [ ] Contém `Botafogo x {Adversario}`.
 
 ### FR-003: Blocos de van
@@ -73,7 +79,7 @@ Este spec gera a **lista oficial** (texto copiável para o WhatsApp) a partir do
 **Why:** Permite ao frontend (Spec 90) obter e copiar a lista.
 
 **Acceptance Criteria:**
-- [ ] Arquivo `backend/src/CaronaAlvinegra.Api/Controllers/ListaController.cs` (ou similar) existe com `[Authorize]`.
+- [ ] Arquivo `backend/src/CaronaAlvinegra.Api/Controllers/ListaController.cs` existe com `[Authorize]`.
 - [ ] `GET /api/jogos/{jogoId}/lista` retorna 200 com `{ texto }`, ou 404 se o jogo não existir.
 
 ### FR-007: Testes de formatação
@@ -107,9 +113,10 @@ Este spec gera a **lista oficial** (texto copiável para o WhatsApp) a partir do
 ## Edge Cases & Error States
 
 - **Jogo sem alocação:** retornar erro claro (400/404) — a lista só é gerada após a alocação (Spec 70).
-- **Jogo sem nenhum participante:** lista vazia (só cabeçalho + rodapé) ou erro — definir como erro claro (400).
+- **Jogo sem nenhum participante:** retorna erro claro (400).
 - **Grupo escalado (não alocado):** não aparece na lista (a lista cobre apenas vans e spin).
 - **Responsável não encontrado entre os participantes:** o responsável é omitido do topo e os participantes são listados normalmente (sem `( Resp)`).
+- **Grupo referenciado na alocação que não existe mais (excluído após alocar):** é ignorado na montagem (sem exceção); se todos os grupos de uma van foram excluídos, o bloco daquela van é omitido da lista.
 
 ## Dependencies
 

@@ -1,3 +1,9 @@
+---
+name: crud-participantes-grupos
+status: verified
+references: V1
+---
+
 # Spec 40: CRUD de Participantes e Grupos — Requirements
 
 ## Value Delivery
@@ -30,6 +36,7 @@ Este spec implementa o **CRUD completo de Participantes e Grupos** (camadas Appl
 - [ ] Arquivo `backend/src/CaronaAlvinegra.Infrastructure/Repositories/GrupoRepository.cs` existe e implementa `IGrupoRepository`.
 - [ ] Arquivo `backend/src/CaronaAlvinegra.Infrastructure/Repositories/ParticipanteRepository.cs` existe e implementa `IParticipanteRepository`.
 - [ ] `CountByGrupoAsync` conta participantes com `GrupoId == grupoId`.
+- [ ] `GrupoRepository.GetByIdAsync` e `GrupoRepository.GetAllAsync` carregam os participantes com `Include(g => g.Participantes)` (sem lazy loading configurado, sem isso `GrupoResponse.Participantes` vem vazio e os Specs 70/80/110 não enxergam ninguém).
 
 ### FR-003: DTOs de Grupo e Participante
 
@@ -110,6 +117,7 @@ Este spec implementa o **CRUD completo de Participantes e Grupos** (camadas Appl
 
 **Acceptance Criteria:**
 - [ ] Teste valida que criar o 16º participante num grupo lança `DomainException`.
+- [ ] Teste valida que mover participante para grupo cheio lança `DomainException`.
 - [ ] Teste valida que excluir grupo com participantes retorna conflito.
 - [ ] `dotnet test backend/tests/CaronaAlvinegra.Domain.Tests` termina com exit code 0.
 
@@ -144,6 +152,7 @@ Este spec implementa o **CRUD completo de Participantes e Grupos** (camadas Appl
 - **Grupo/participante não encontrado:** 404.
 - **`Nome`/`WhatsApp` vazios:** `DomainException` (validação do domínio) → 400.
 - **Participante com `GrupoId` inexistente:** rejeitar com erro claro (validar existência do grupo no caso de uso).
+- **Excluir participante que possui `Pagamento`:** permitido; a FK `Pagamentos.ParticipanteId → Participantes.Id` é `ON DELETE CASCADE` (Spec 20), então os pagamentos do participante são removidos junto. Não há tratamento especial no service.
 
 ## Dependencies
 

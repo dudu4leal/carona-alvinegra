@@ -1,3 +1,9 @@
+---
+name: marcacao-pagamento
+status: verified
+references: V1
+---
+
 # Spec 60: Marcação de Pagamento — Requirements
 
 ## Value Delivery
@@ -49,7 +55,7 @@ Este spec implementa a **marcação de pagamento (pago/não pago)** por particip
 - [ ] Arquivo `backend/src/CaronaAlvinegra.Application/Services/PagamentoService.cs` existe.
 - [ ] `MarcarPagoAsync(jogoId, participanteId)`, `DesmarcarPagoAsync(jogoId, participanteId)` e `ListarPorJogoAsync(jogoId)` implementados.
 - [ ] `MarcarPagoAsync` cria (se não existe) ou atualiza o pagamento para `Pago = true`.
-- [ ] `DesmarcarPagoAsync` define `Pago = false`.
+- [ ] `DesmarcarPagoAsync` define `Pago = false` quando o pagamento existe; se não existir, retorna `ReembolsoDevido = false` sem criar registro.
 
 ### FR-005: Regra de reembolso (janela de 48h)
 
@@ -60,7 +66,7 @@ Este spec implementa a **marcação de pagamento (pago/não pago)** por particip
 **Acceptance Criteria:**
 - [ ] `DesmarcarPagoAsync` retorna `ReembolsoDevido = true` quando o cancelamento ocorre **≥ 48h** antes do horário de saída do jogo.
 - [ ] `DesmarcarPagoAsync` retorna `ReembolsoDevido = false` quando o cancelamento ocorre **< 48h** antes.
-- [ ] O "momento do jogo" é calculado como `Jogo.Data` (data) + `Jogo.HorarioSaida`.
+- [ ] O "momento do jogo" é calculado como `Jogo.Data.Date` + `Jogo.HorarioSaida`.
 - [ ] A exceção "reposição de vaga" é tratada como **decisão manual do Jones** (fora da automação v1).
 
 ### FR-006: `PagamentosController`

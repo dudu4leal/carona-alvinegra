@@ -9,7 +9,7 @@ Adicionar **Identity + JWT** à API existente de forma mínima: o `ApplicationDb
 - **`IdentityDbContext<IdentityUser>`** em vez de um contexto separado — um único banco/contexto para domínio + Identity.
 - **`JwtTokenService` na Infrastructure** (gera token a partir de `IConfiguration`), injetado no controller.
 - **Login no controller (Api)**, não numa camada Application, porque depende de `UserManager`/`IdentityUser` (Infrastructure) e a regra de dependência não permite a Application referenciar Infrastructure. Evita abstração prematura para um único endpoint (KISS).
-- **`[Authorize]` global** com exceções pontuais (`[AllowAnonymous]` em `/health` e login) — protege por padrão todo controller futuro.
+- **Autorização global** via `app.MapControllers().RequireAuthorization()`, com `[AllowAnonymous]` no `AuthController`; o `/health` (minimal API) permanece público.
 
 ## Component / Module Breakdown
 
@@ -115,7 +115,16 @@ builder.Services.AddIdentityCore<IdentityUser>(options => {
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options => { /* TokenValidationParameters a partir de config */ });
+    .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    });
 builder.Services.AddAuthorization();
 ```
 

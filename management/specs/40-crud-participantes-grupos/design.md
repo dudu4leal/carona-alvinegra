@@ -86,17 +86,19 @@ public record ParticipanteResponse(Guid Id, string Nome, string WhatsApp, Guid G
 
 **Interface:**
 ```csharp
+public enum ExclusaoResult { Ok, NotFound, Conflito }
+
 public class GrupoService
 {
     Task<GrupoResponse> CriarAsync(GrupoCreateRequest req);
     Task<List<GrupoResponse>> ListarAsync();
     Task<GrupoResponse?> ObterAsync(Guid id);
     Task<GrupoResponse?> AtualizarAsync(Guid id, GrupoUpdateRequest req);
-    Task<bool> ExcluirAsync(Guid id); // false se 409 (tem participantes)
+    Task<ExclusaoResult> ExcluirAsync(Guid id);
 }
 ```
 
-**Internal Logic:** `CriarAsync` instancia `Grupo(nome, rota)` e persiste. `ExcluirAsync` verifica se há participantes (via `IParticipanteRepository.CountByGrupoAsync` ou `GetAllAsync(grupoId)`); se houver, retorna conflito; senão remove e salva.
+**Internal Logic:** `CriarAsync` instancia `Grupo(nome, rota)` e persiste. `ExcluirAsync` carrega o grupo; se não existir retorna `NotFound`; se `CountByGrupoAsync(grupoId) > 0` retorna `Conflito`; senão remove, salva e retorna `Ok`.
 
 **Dependencies:** `IGrupoRepository`, `IParticipanteRepository`.
 
@@ -114,7 +116,7 @@ public class ParticipanteService
     Task<List<ParticipanteResponse>> ListarAsync(Guid? grupoId = null);
     Task<ParticipanteResponse?> ObterAsync(Guid id);
     Task<ParticipanteResponse?> AtualizarAsync(Guid id, ParticipanteUpdateRequest req);
-    Task<bool> ExcluirAsync(Guid id);
+    Task<bool> ExcluirAsync(Guid id); // true = excluído; false = não encontrado
 }
 ```
 
@@ -140,7 +142,7 @@ public class ParticipanteService
 
 **Purpose:** Mapear exceção de domínio para 400.
 
-**Interface:** Middleware/filtro simples (`ExceptionMiddleware` ou `[ApiController]` + `InvalidModelState`).
+**Interface:** `DomainExceptionMiddleware` (middleware dedicado) registrado no `Program.cs`.
 
 **Internal Logic:** Captura `DomainException` e retorna `400` com `{ "message": ... }`.
 
@@ -186,7 +188,7 @@ backend/tests/CaronaAlvinegra.Domain.Tests/
 
 ## Testing Strategy
 
-- **ParticipanteServiceTests** (com repositórios in-memory ou mock): criar até 15 OK; 16º lança `DomainException`; mover para grupo cheio lança `DomainException`; excluir grupo com participantes retorna conflito.
+- **ParticipanteServiceTests** (com fakes in-memory escritos à mão, sem pacote de mock — ver Spec 10): criar até 15 OK; 16º lança `DomainException`; mover para grupo cheio lança `DomainException`; excluir grupo com participantes retorna conflito.
 - **Build/test:** `dotnet build` e `dotnet test` com exit code 0.
 
 ## Migration / Rollback

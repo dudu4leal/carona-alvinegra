@@ -18,7 +18,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/src/CaronaAlvinegra.Domain/Exceptions/DomainException.cs` com `public class DomainException : Exception { public DomainException(string message) : base(message) { } }`.
 2. Criar `backend/src/CaronaAlvinegra.Domain/Enums/Rota.cs` com `public enum Rota { Quitandinha, Bingen }`.
 **Validation:** Os dois arquivos existem e compilam.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 2: Criar entidade `Participante`
 
@@ -29,7 +29,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/src/CaronaAlvinegra.Domain/Entities/Participante.cs`.
 2. Implementar propriedades `Id`, `Nome`, `WhatsApp`, `GrupoId` e construtor que gera Id e valida `Nome`/`WhatsApp` não-vazios (lança `DomainException`).
 **Validation:** Arquivo existe e `dotnet build` compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 3: Criar aggregate `Grupo`
 
@@ -40,7 +40,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/src/CaronaAlvinegra.Domain/Entities/Grupo.cs`.
 2. Implementar `CapacidadeMaxima = 15`, lista privada de participantes, `IReadOnlyCollection` exposto, `AdicionarParticipante` (lança `DomainException` quando cheio) e `RemoverParticipante` (idempotente).
 **Validation:** Arquivo existe e compila; o 16º participante lança exceção (validado em Task 8).
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 4: Criar entidades `Van` e `Spin`
 
@@ -51,7 +51,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/src/CaronaAlvinegra.Domain/Entities/Van.cs` com `Capacidade = 15`, `Rota`, `Motorista`, `ResponsavelId` e validação de motorista não-vazio.
 2. Criar `backend/src/CaronaAlvinegra.Domain/Entities/Spin.cs` com `Capacidade = 6` e `Rota`.
 **Validation:** Arquivos existem e compilam.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 5: Criar aggregate `Jogo`
 
@@ -62,7 +62,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/src/CaronaAlvinegra.Domain/Entities/Jogo.cs`.
 2. Implementar `CompeticaoCodigo`, `Adversario`, `Data`, `HorarioSaida`, `PontoEmbarque` com validações de não-vazio.
 **Validation:** Arquivo existe e compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 6: Criar entidades `Pagamento` e `ListaEspera`
 
@@ -73,7 +73,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/src/CaronaAlvinegra.Domain/Entities/Pagamento.cs` com `Pago` default false e métodos `MarcarPago`/`DesmarcarPago`.
 2. Criar `backend/src/CaronaAlvinegra.Domain/Entities/ListaEspera.cs` com lista privada de `Guid` e métodos `AdicionarParticipante`/`RemoverParticipante`.
 **Validation:** Arquivos existem e compilam.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 7: Adicionar DbSets e mappings (Infrastructure)
 
@@ -84,7 +84,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Editar `backend/src/CaronaAlvinegra.Infrastructure/Data/ApplicationDbContext.cs` adicionando `DbSet` para as 7 entidades e um `OnModelCreating` que aplica as configurações.
 2. Criar `backend/src/CaronaAlvinegra.Infrastructure/Data/Configurations/` com `IEntityTypeConfiguration<T>` para cada entidade (conversão de `Rota`, `HasMaxLength`, relacionamento Grupo→Participante).
 **Validation:** `dotnet build backend/CaronaAlvinegra.sln` termina com exit code 0.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 8: Gerar migration inicial
 
@@ -95,7 +95,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Instalar/garantir `dotnet-ef`: `dotnet tool install --global dotnet-ef` (ou `dotnet tool update --global dotnet-ef`).
 2. Executar `dotnet ef migrations add InitialCreate --project src/CaronaAlvinegra.Infrastructure --startup-project src/CaronaAlvinegra.Api`.
 **Validation:** Pasta `backend/src/CaronaAlvinegra.Infrastructure/Migrations/` existe com arquivos da migration.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 9: Criar testes de invariantes
 
@@ -106,4 +106,4 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/tests/CaronaAlvinegra.Domain.Tests/GrupoTests.cs`.
 2. Testar: 15 participantes aceitos; 16º lança `DomainException`; `Participante` rejeita nome vazio; `Jogo` rejeita adversário vazio.
 **Validation:** `dotnet test backend/tests/CaronaAlvinegra.Domain.Tests` termina com exit code 0.
-**Status:** [ ] pending
+**Status:** [x] done

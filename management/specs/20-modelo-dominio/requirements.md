@@ -1,3 +1,9 @@
+---
+name: modelo-dominio
+status: audited
+references: V5
+---
+
 # Spec 20: Modelo de Domínio — Requirements
 
 ## Value Delivery
@@ -118,8 +124,8 @@ Este spec define as **entidades e value objects do domínio** no projeto `Carona
 
 **Acceptance Criteria:**
 - [ ] `ApplicationDbContext` possui `DbSet` para `Participante`, `Grupo`, `Van`, `Spin`, `Jogo`, `Pagamento` e `ListaEspera`.
-- [ ] Há uma classe de configuração (ex.: `GrupoConfiguration`) aplicando o mapeamento de `Rota` (convertido para `string`/`int` no banco) e limites de tamanho das strings.
-- [ ] A migration `InitialCreate` (ou equivalente) existe sob `backend/src/CaronaAlvinegra.Infrastructure/Migrations/`.
+- [ ] Há uma classe de configuração (ex.: `GrupoConfiguration`) aplicando o mapeamento de `Rota` (convertido para `string` no banco) e limites de tamanho das strings.
+- [ ] A migration `InitialCreate` existe sob `backend/src/CaronaAlvinegra.Infrastructure/Migrations/`.
 - [ ] `dotnet build backend/CaronaAlvinegra.sln` termina com exit code 0.
 
 ### FR-011: Testes de invariantes do domínio

@@ -3,7 +3,7 @@
 ## Spec Statuses
 
 | Status | Meaning |
-|---|---|
+|---|---|---|---|
 | `proposed` | Idea stage, no spec written yet |
 | `planned` | Roadmap entry created via /spec-plan |
 | `created` | Spec documents created via /spec-new |
@@ -19,16 +19,17 @@
 
 | # | Name | Status | References |
 |---|---|---|---|
-| 10 | fundacao-backend | created | V5 |
-| 20 | modelo-dominio | created | V5 |
-| 30 | autenticacao | created | V4 |
-| 40 | crud-participantes-grupos | created | V1 |
-| 50 | gestao-jogos | created | V1 |
-| 60 | marcacao-pagamento | created | V1 |
-| 70 | algoritmo-alocacao | created | V2 |
-| 80 | lista-oficial | created | V3 |
-| 90 | frontend-react | created | V6 |
-| 100 | deploy | created | V7 |
+| 10 | fundacao-backend | audited | V5 |
+| 20 | modelo-dominio | audited | V5 |
+| 30 | autenticacao | verified | V4 |
+| 40 | crud-participantes-grupos | verified | V1 |
+| 50 | gestao-jogos | verified | V1 |
+| 60 | marcacao-pagamento | verified | V1 |
+| 70 | algoritmo-alocacao | verified | V2 |
+| 80 | lista-oficial | verified | V3 |
+| 90 | frontend-react | verified | V6 |
+| 100 | deploy | verified | V7 |
+| 110 | atribuicao-responsavel-van | verified | V3 |
 
 ---
 
@@ -44,5 +45,6 @@
         │           └─> 70 (algoritmo-alocacao)
         │                 └─> 80 (lista-oficial)
         └─> 90 (frontend-react)  [depende de 30, 40, 50, 60, 70, 80]
-              └─> 100 (deploy)   [depende de 10..90]
+              └─> 110 (atribuicao-responsavel-van)  [depende de 40, 70, 80, 90]
+                    └─> 100 (deploy)                [depende de 10..110]
 ```

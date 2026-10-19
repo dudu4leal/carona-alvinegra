@@ -19,7 +19,7 @@ Scaffolding determinístico de uma solução .NET 9 em DDD tático. A prioridade
 
 **Interface:** 5 arquivos `.csproj` + `CaronaAlvinegra.sln`.
 
-**Internal Logic:** Projetos criados com `dotnet new classlib` / `webapi` / `xunit`, depois movidos para `src/` e `tests/` e adicionados à solução com `dotnet sln add`.
+**Internal Logic:** Projetos criados com `dotnet new classlib` / `webapi --use-controllers` / `xunit`, depois movidos para `src/` e `tests/` e adicionados à solução com `dotnet sln add`.
 
 **Dependencies:** SDK .NET 9.
 
@@ -51,16 +51,31 @@ public class ApplicationDbContext : DbContext
 
 **Interface (esqueleto):**
 ```csharp
+using System.Text.Json.Serialization;
+using CaronaAlvinegra.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
+    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "Connection string 'DefaultConnection' não configurada. Defina ConnectionStrings:DefaultConnection (appsettings.Development.json) ou a variável de ambiente ConnectionStrings__DefaultConnection.");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 var app = builder.Build();
+
+app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {
@@ -74,11 +89,29 @@ app.MapControllers();
 app.Run();
 ```
 
-**Internal Logic:** Registra `ApplicationDbContext`, Swagger e o endpoint `/health`. CORS permissivo pode ser adicionado em desenvolvimento (opcional, pois o frontend do Spec 90 será servido de outra origem).
+**Internal Logic:** Registra `ApplicationDbContext`, CORS permissivo, Swagger e o endpoint `/health`. `JsonStringEnumConverter` garante o contrato do enum `Rota` como string (Spec 90). O CORS permissivo permite que o frontend (Spec 90) chame a API em desenvolvimento; em produção o nginx (Spec 100) serve o SPA na mesma origem.
+
+**Development URL:** `backend/src/CaronaAlvinegra.Api/Properties/launchSettings.json` com perfil `http`:
+```json
+{
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5000",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
+```
+Este arquivo é a fonte da porta 5000 usada pelo `baseURL` do frontend (Spec 90); o Spec 100 usa 8080 dentro do container via `ASPNETCORE_URLS` e não depende dele.
 
 **Dependencies:** `CaronaAlvinegra.Application`, `CaronaAlvinegra.Infrastructure`.
 
-**Error Handling:** O app sobe mesmo sem banco (lazy connection). A ausência de connection string em produção falha apenas na primeira query — documentado.
+**Error Handling:** O app sobe mesmo sem banco (lazy connection). Se `ConnectionStrings:DefaultConnection` estiver ausente em todas as fontes, a inicialização falha com `InvalidOperationException` de mensagem explícita (antes de qualquer query) — em produção a variável `ConnectionStrings__DefaultConnection` é obrigatória.
 
 ### Componente: Health check
 
@@ -119,6 +152,7 @@ app.Run();
 ## File / Module Layout
 
 ```
+global.json                           # pin do SDK 9.0.x (reprodutibilidade, evita .slnx do SDK 10)
 backend/
 ├── CaronaAlvinegra.sln
 ├── .gitignore                        # bin/, obj/
@@ -132,7 +166,9 @@ backend/
 │   │   └── Data/
 │   │       └── ApplicationDbContext.cs
 │   └── CaronaAlvinegra.Api/
-│       ├── CaronaAlvinegra.Api.csproj
+│       ├── CaronaAlvinegra.Api.csproj  # OutputType=Exe explícito (FR-001)
+│       ├── Properties/
+│       │   └── launchSettings.json     # applicationUrl http://localhost:5000 (Spec 90)
 │       ├── Program.cs
 │       ├── appsettings.json
 │       └── appsettings.Development.json
@@ -148,6 +184,7 @@ backend/
 - **Build check:** `dotnet build backend/CaronaAlvinegra.sln` deve sair com exit code 0.
 - **Camada check:** verificar manualmente que `CaronaAlvinegra.Domain.csproj` e `CaronaAlvinegra.Application.csproj` não possuem `ProjectReference`/`PackageReference` indevidos.
 - Testes de domínio reais entram no Spec 20.
+- **Testes de serviço (Application):** usar **fakes in-memory escritos à mão** (classes de teste que implementam `IGrupoRepository`, `IParticipanteRepository`, `IJogoRepository`, `IPagamentoRepository`, `IAlocacaoRepository` etc. com listas em memória). **Não** adicionar pacotes de mock (Moq/NSubstitute) nem EF Core InMemory — mantém o projeto de testes com apenas xunit e evita decisões de versão.
 
 ## Migration / Rollback
 

@@ -1,3 +1,9 @@
+---
+name: frontend-react
+status: verified
+references: V6
+---
+
 # Spec 90: Frontend React + TypeScript — Requirements
 
 ## Value Delivery
@@ -19,11 +25,11 @@ Este spec cria o app **React + TypeScript** (Vite) que consome a API REST do bac
 **Acceptance Criteria:**
 - [ ] `frontend/package.json` existe com React, TypeScript e Vite.
 - [ ] `frontend/vite.config.ts` e `frontend/tsconfig.json` existem.
-- [ ] `npm run build` (ou `tsc --noEmit` + `vite build`) termina com exit code 0.
+- [ ] `npm run build` termina com exit code 0.
 
 ### FR-002: Cliente HTTP com token
 
-**What:** Criar um cliente HTTP (ex.: `api/client.ts`) com base URL configurável e interceptor que injeta `Authorization: Bearer <token>`.
+**What:** Criar um cliente HTTP em `api/client.ts` com base URL configurável e interceptor que injeta `Authorization: Bearer <token>`.
 
 **Why:** Centraliza as chamadas à API e o envio do JWT.
 
@@ -62,7 +68,7 @@ Este spec cria o app **React + TypeScript** (Vite) que consome a API REST do bac
 **Acceptance Criteria:**
 - [ ] `frontend/src/components/Layout.tsx` existe com links para as telas.
 - [ ] Rotas protegidas redirecionam para `/login` sem token.
-- [ ] Usa React Router (ou equivalente) com as rotas das telas.
+- [ ] Usa React Router com as rotas das telas; a rota `/` redireciona para `/grupos`.
 
 ### FR-006: Tela de Grupos
 
@@ -102,7 +108,9 @@ Este spec cria o app **React + TypeScript** (Vite) que consome a API REST do bac
 
 **Acceptance Criteria:**
 - [ ] `frontend/src/pages/PagamentosPage.tsx` existe.
-- [ ] Consome `GET /api/jogos/{id}/pagamentos` e os endpoints `marcar-pago`/`desmarcar-pago`.
+- [ ] Carrega `GET /api/participantes` **e** `GET /api/jogos/{id}/pagamentos` e exibe uma linha por participante (nome + grupo) — não apenas os pagamentos já existentes. Participante sem registro de pagamento aparece como "não pago" (primeiro pagamento é marcável; `POST .../marcar-pago` cria o registro).
+- [ ] Consome os endpoints `POST /api/jogos/{id}/pagamentos/{participanteId}/marcar-pago` e `.../desmarcar-pago`.
+- [ ] Ao desmarcar, lê `reembolsoDevido` da resposta e informa o Jones se o reembolso é devido (Spec 60 FR-005); sem isso, a regra de 48h não tem consumidor na v1.
 
 ### FR-010: Tela de Alocação
 
@@ -112,7 +120,8 @@ Este spec cria o app **React + TypeScript** (Vite) que consome a API REST do bac
 
 **Acceptance Criteria:**
 - [ ] `frontend/src/pages/AlocacaoPage.tsx` existe.
-- [ ] Consome `POST /api/jogos/{id}/alocar` e `GET /api/jogos/{id}/alocacao`.
+- [ ] Consome `POST /api/jogos/{id}/alocar` e `GET /api/jogos/{id}/alocacao`, tratando a resposta como **array** `Alocacao[]` (o backend retorna uma alocação por rota — `Quitandinha` e `Bingen`; ver Spec 70).
+- [ ] Renderiza cada alocação do array em um bloco próprio, com rota, vans (motorista/ocupação), spin (se houver), grupos escalados e grupos pendentes (não pagos).
 
 ### FR-011: Tela de Lista Oficial
 
@@ -152,7 +161,7 @@ Este spec cria o app **React + TypeScript** (Vite) que consome a API REST do bac
 ## Constraints
 
 - **React + TypeScript + Vite** (ADR-002).
-- **KISS**: sem framework de UI pesado; CSS simples ou Tailwind (decisão de implementação, preferir o mais simples).
+- **KISS**: sem framework de UI pesado; CSS simples (sem Tailwind).
 - **API REST** do backend (contratos dos Specs 40–80).
 - **JWT** no `Authorization` header.
 

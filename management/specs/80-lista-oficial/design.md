@@ -43,9 +43,9 @@ public class ListaOficialService
 ```
 LISTA OFICIAL
 {CompeticaoCodigo}
-Data: {Data:dd-MM}, {DiaDaSemana}
+Data: {Data:d-M}, {DiaDaSemana}
 Saída, {HorarioSaida}
-Embarque: {PontoEmbarque}
+Embarque: {PontoEmbarque} ✈️
 Botafogo x {Adversario}
 ```
 `DiaDaSemana` em português (Segunda…Domingo) a partir de `Jogo.Data`.
@@ -178,7 +178,7 @@ backend/tests/CaronaAlvinegra.Domain.Tests/
 
 ## Testing Strategy
 
-- **ListaOficialServiceTests** (repositórios in-memory/mock): cabeçalho contém `LISTA OFICIAL` + código + adversário; responsável aparece primeiro com `( Resp)`; rodapé fixo presente; spin omitido quando não há.
+- **ListaOficialServiceTests** (com fakes in-memory escritos à mão, sem pacote de mock — ver Spec 10): cabeçalho contém `LISTA OFICIAL` + código + adversário; responsável aparece primeiro com `( Resp)`; rodapé fixo presente; spin omitido quando não há.
 - **Build/test:** `dotnet build` e `dotnet test` com exit code 0.
 
 ## Migration / Rollback

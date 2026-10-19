@@ -1,3 +1,9 @@
+---
+name: algoritmo-alocacao
+status: verified
+references: V2
+---
+
 # Spec 70: Algoritmo de Alocação — Requirements
 
 ## Value Delivery
@@ -70,7 +76,7 @@ Este spec implementa o **algoritmo de alocação contínua e automática** — o
 **Why:** Regra de negócio do brainstorm §5/§6.
 
 **Acceptance Criteria:**
-- [ ] Se `ocupacaoSpin + tamanhoListaEspera >= 12`, o spin é removido e uma `VanAlocada` promovida é criada com os grupos do spin.
+- [ ] Se `ocupacaoSpin + tamanhoListaEspera >= 12`, o spin é removido e uma `VanAlocada` promovida é criada com os grupos do spin e `Ocupacao = ocupacaoSpin + tamanhoListaEspera`.
 - [ ] Se a condição não é atendida, o spin permanece.
 
 ### FR-007: Persistência da alocação
@@ -80,20 +86,32 @@ Este spec implementa o **algoritmo de alocação contínua e automática** — o
 **Why:** Persistir o resultado da alocação para gerar a lista oficial (Spec 80).
 
 **Acceptance Criteria:**
-- [ ] `backend/src/CaronaAlvinegra.Application/Interfaces/IAlocacaoRepository.cs` existe com `AddAsync`, `GetByJogoRotaAsync`, `RemoveByJogoAsync` e `SaveChangesAsync`.
+- [ ] `backend/src/CaronaAlvinegra.Application/Interfaces/IAlocacaoRepository.cs` existe com `AddAsync`, `GetByJogoAsync`, `RemoveByJogoAsync` e `SaveChangesAsync`.
 - [ ] `backend/src/CaronaAlvinegra.Infrastructure/Repositories/AlocacaoRepository.cs` existe e implementa a interface.
 - [ ] Migration nova cria as tabelas de `Alocacao`, `VanAlocada` e `SpinAlocado`.
+- [ ] `backend/src/CaronaAlvinegra.Application/Interfaces/IListaEsperaRepository.cs` existe com `GetByJogoRotaAsync(Guid jogoId, Rota rota)`.
+- [ ] `backend/src/CaronaAlvinegra.Infrastructure/Repositories/ListaEsperaRepository.cs` existe e implementa a interface.
 
 ### FR-008: Caso de uso `AlocacaoService`
 
-**What:** Criar `AlocacaoService` (Application) que carrega os grupos confirmados do jogo, chama o `Alocador` por rota e persiste.
+**What:** Criar `AlocacaoService` (Application) que carrega os **grupos confirmados** do jogo, chama o `Alocador` por rota e persiste.
 
 **Why:** Orquestra o algoritmo com os dados reais do banco.
 
+**Definição de "grupo confirmado" (regra fechada):**
+- Confirmado = o grupo tem **≥ 1 participante** e **todos** os seus participantes possuem `Pagamento` com `JogoId == jogoId` e `Pago == true`.
+- Fonte de dados: `IPagamentoRepository.GetByJogoAsync(jogoId)` (Spec 60). Monta-se o conjunto `pagantes = { p.ParticipanteId | p.Pago }`.
+- Grupo com qualquer participante sem pagamento pago (ou sem registro) **não entra** na alocação e é reportado em `GruposPendentes` da rota.
+- Grupo com zero participantes é **ignorado** (não entra na alocação e **não** aparece em `GruposPendentes`).
+
 **Acceptance Criteria:**
 - [ ] Arquivo `backend/src/CaronaAlvinegra.Application/Services/AlocacaoService.cs` existe.
-- [ ] Método `AlocarJogoAsync(Guid jogoId)` agrupa os grupos confirmados por rota, chama `Alocador.Alocar` para cada rota e persiste as alocações.
-- [ ] Método `ObterAlocacaoAsync(Guid jogoId)` retorna as alocações persistidas.
+- [ ] `AlocarJogoAsync(Guid jogoId)` obtém os pagamentos do jogo via `IPagamentoRepository.GetByJogoAsync`, calcula o conjunto de pagantes e seleciona os grupos confirmados conforme a definição acima.
+- [ ] Os grupos confirmados são agrupados por `Rota`; para cada rota com pelo menos um grupo (confirmado ou pendente), chama `Alocador.Alocar` (mesmo que a lista de confirmados esteja vazia) e persiste o resultado.
+- [ ] Cada `AlocacaoResponse` inclui `GruposPendentes` com os `Guid` dos grupos daquela rota que não foram confirmados (não pagos).
+- [ ] Se o jogo não tiver nenhum grupo com ≥1 participante, `AlocarJogoAsync` retorna lista vazia e remove alocações antigas do jogo.
+- [ ] `ObterAsync(Guid jogoId)` retorna as alocações persistidas **recalculando** `GruposPendentes` com os pagamentos atuais (o valor não é persistido).
+- [ ] Teste cobre: grupo 100% pago entra; grupo parcialmente pago não entra e aparece em `GruposPendentes`; grupo sem participantes é ignorado.
 
 ### FR-009: `AlocacoesController`
 
@@ -103,8 +121,9 @@ Este spec implementa o **algoritmo de alocação contínua e automática** — o
 
 **Acceptance Criteria:**
 - [ ] Arquivo `backend/src/CaronaAlvinegra.Api/Controllers/AlocacoesController.cs` existe com `[Authorize]`.
-- [ ] `POST /api/jogos/{jogoId}/alocar` roda o algoritmo e retorna o resultado (200).
-- [ ] `GET /api/jogos/{jogoId}/alocacao` retorna a alocação persistida (200/404).
+- [ ] `POST /api/jogos/{jogoId}/alocar` roda o algoritmo e retorna `List<AlocacaoResponse>` (200), incluindo `gruposEscalados` e `gruposPendentes`.
+- [ ] `GET /api/jogos/{jogoId}/alocacao` retorna a alocação persistida (200/404), incluindo `gruposPendentes` recalculado.
+- [ ] `POST` em jogo inexistente retorna 404.
 
 ### FR-010: Testes do algoritmo
 
@@ -140,6 +159,7 @@ Este spec implementa o **algoritmo de alocação contínua e automática** — o
 - **Capacidades:** van = 15, spin = 6 (constantes do Spec 20).
 - **`[Authorize]`** nos controllers.
 - **KISS/DRY**: usar `Van.Capacidade`, `Spin.Capacidade` e `Grupo.CapacidadeMaxima` como fontes únicas.
+- **Lista de espera vazia na v1:** nenhum spec cria/edita `ListaEspera`, então `tamanhoListaEspera` é sempre `0` em produção e a promoção spin+espera não dispara fora dos testes. O parâmetro permanece no contrato do `Alocador` para uso futuro.
 
 ## Edge Cases & Error States
 
@@ -149,16 +169,23 @@ Este spec implementa o **algoritmo de alocação contínua e automática** — o
 - **Sobra exatamente 6:** vira spin.
 - **Sobra exatamente 7:** escalação (não cabe na spin de 6 e não justifica van de 12).
 - **Lista de espera sem spin:** a promoção não se aplica (sem spin não há o que promover).
+- **Grupo com pagamento parcial:** não é confirmado; fica fora da alocação e é reportado em `GruposPendentes` da rota.
+- **Grupo sem participantes:** é ignorado (não alocado e não listado em `GruposPendentes`).
+- **Nenhum grupo confirmado em uma rota com grupos pendentes:** a rota aparece no resultado com `vans` e `spin` vazios e `gruposPendentes` preenchido; nenhuma van/spin é criada.
 - **Reexecutar a alocação:** `RemoveByJogoAsync` remove alocações anteriores do jogo antes de regravar (idempotente).
 
 ## Dependencies
 
 - **Spec 20 (modelo-dominio)** — `Grupo`, `Van`, `Spin`, `ListaEspera`, constantes de capacidade.
 - **Spec 40/50** — participantes/grupos e jogos cadastrados.
+- **Spec 60 (marcacao-pagamento)** — `IPagamentoRepository.GetByJogoAsync` e `Pagamento.Pago`, usados para definir os grupos confirmados (FR-008).
 - **Spec 30 (autenticacao)** — `[Authorize]`.
+- **Spec 110 (atribuicao-responsavel-van)** — consome `Alocacao`/`VanAlocada` para definir motorista/responsável; não altera a regra de empacotamento.
 
 ## Out of Scope
 
 - Edição manual fina da alocação (arrastar grupos entre vans) — futuro.
+- Preenchimento de motorista/responsável da van — Spec 110.
+- CRUD da lista de espera (v1: sempre vazia; ver Constraints).
 - Geração da lista oficial (Spec 80).
 - Notificação automática ao Jones/escalados — futuro.

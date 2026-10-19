@@ -80,7 +80,7 @@ public class PagamentoService
 
 **Internal Logic:**
 - `MarcarPagoAsync`: busca pagamento por `(participanteId, jogoId)`; se não existir, cria `Pagamento(participanteId, jogoId)` e `MarcarPago()`; senão `MarcarPago()`; salva.
-- `DesmarcarPagoAsync`: busca pagamento; se existir, `DesmarcarPago()`; salva; calcula `ReembolsoDevido` comparando `DateTime.Now` com `(jogo.Data.Date + jogo.HorarioSaida) - 48h`.
+- `DesmarcarPagoAsync`: busca pagamento por `(participanteId, jogoId)`; se **não existir**, retorna `DesmarcarPagamentoResponse(ReembolsoDevido: false)` sem criar registro; se existir, `DesmarcarPago()` + salva e calcula `ReembolsoDevido` comparando `DateTime.Now` com `(jogo.Data.Date + jogo.HorarioSaida) - 48h`.
 - `ListarPorJogoAsync`: retorna pagamentos do jogo.
 
 **Dependencies:** `IPagamentoRepository`, `IJogoRepository`, `Pagamento`, `Jogo`.
@@ -131,7 +131,7 @@ backend/tests/CaronaAlvinegra.Domain.Tests/
 
 ## Testing Strategy
 
-- **PagamentoServiceTests** (repositórios in-memory/mock): marcar cria `Pago=true`; desmarcar ≥48h → `ReembolsoDevido=true`; desmarcar <48h → `ReembolsoDevido=false`; idempotência.
+- **PagamentoServiceTests** (com fakes in-memory escritos à mão, sem pacote de mock — ver Spec 10): marcar cria `Pago=true`; desmarcar ≥48h → `ReembolsoDevido=true`; desmarcar <48h → `ReembolsoDevido=false`; idempotência.
 - **Build/test:** `dotnet build` e `dotnet test` com exit code 0.
 
 ## Migration / Rollback

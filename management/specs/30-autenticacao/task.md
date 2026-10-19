@@ -71,7 +71,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `backend/src/CaronaAlvinegra.Api/Contracts/LoginRequest.cs` e `LoginResponse.cs` (records).
 2. Criar `backend/src/CaronaAlvinegra.Api/Controllers/AuthController.cs` com `POST /api/auth/login` usando `UserManager` + `JwtTokenService`.
-3. Registrar `JwtTokenService` no DI (`builder.Services.AddScoped<JwtTokenService>()` ou singleton).
+3. Registrar `JwtTokenService` no DI (`builder.Services.AddScoped<JwtTokenService>()`).
 **Validation:** `dotnet build` compila; a rota existe.
 **Status:** [ ] pending
 
@@ -81,10 +81,11 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Requirements Covered:** FR-007
 **Design References:** "Componente: Seed do usuário Jones"
 **Actions:**
-1. Criar método de seed (ex.: `DataSeeder.SeedAdminAsync` na Infrastructure, ou método estático na Api).
-2. Chamar o seed no `Program.cs` após `builder.Build()`.
+1. Criar o método `SeedAdminUserAsync(IServiceProvider)` (estático) em `backend/src/CaronaAlvinegra.Api/` — nome único e definitivo, referenciado pelo Spec 100.
+2. Chamar o seed no `Program.cs` **após** `builder.Build()`. (Quando o Spec 100 for implementado, o bloco de migrations será inserido **antes** desta chamada.)
 3. Adicionar `SeedAdmin:Email`/`SeedAdmin:Password` em `appsettings.Development.json`.
-**Validation:** Ao iniciar a API, o usuário `SeedAdmin:Email` é criado se não existir; seed é idempotente.
+4. Adicionar `Jwt:Issuer`, `Jwt:Audience` e `Jwt:ExpirationMinutes` (480) em `appsettings.json`, sem `Jwt:Key`.
+**Validation:** Ao iniciar a API, o usuário `SeedAdmin:Email` é criado se não existir; seed é idempotente; `grep -n "SeedAdminUserAsync" backend/src/CaronaAlvinegra.Api/Program.cs` retorna uma ocorrência.
 **Status:** [ ] pending
 
 ### Task 8: Proteger rotas com [Authorize]
@@ -93,7 +94,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Requirements Covered:** FR-008
 **Design References:** "Architecture Decisions"
 **Actions:**
-1. Configurar fallback de autorização global (ex.: `app.MapControllers().RequireAuthorization()` ou política padrão) mantendo `/health` e `AuthController` com `[AllowAnonymous]`.
+1. Configurar `app.MapControllers().RequireAuthorization()`; manter o `AuthController` com `[AllowAnonymous]` (o `/health` é minimal API e já é público).
 2. Garantir que `GET /health` continua público.
 **Validation:** `GET /health` responde sem token; controllers protegidos exigem token.
 **Status:** [ ] pending

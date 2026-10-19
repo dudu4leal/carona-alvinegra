@@ -61,6 +61,8 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `backend/src/CaronaAlvinegra.Application/Interfaces/IAlocacaoRepository.cs`.
 2. Criar `backend/src/CaronaAlvinegra.Infrastructure/Repositories/AlocacaoRepository.cs`.
+3. Criar `backend/src/CaronaAlvinegra.Application/Interfaces/IListaEsperaRepository.cs` (com `GetByJogoRotaAsync`).
+4. Criar `backend/src/CaronaAlvinegra.Infrastructure/Repositories/ListaEsperaRepository.cs`.
 **Validation:** `dotnet build backend/CaronaAlvinegra.sln` compila.
 **Status:** [ ] pending
 
@@ -82,8 +84,10 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Design References:** "Componente: AlocacaoService"
 **Actions:**
 1. Criar `backend/src/CaronaAlvinegra.Application/Services/AlocacaoService.cs`.
-2. Implementar `AlocarJogoAsync` (agrupa por rota, chama Alocador, remove antigas, persiste) e `ObterAsync`.
-**Validation:** Arquivo existe e compila.
+2. Injetar `IPagamentoRepository` e implementar a regra de grupo confirmado: todos os participantes com `Pagamento.Pago == true` para o jogo; grupos não confirmados → `pendentesPorRota`; grupos vazios ignorados.
+3. Implementar `AlocarJogoAsync` (rotas de confirmados ∪ pendentes, chama Alocador por rota, remove antigas, persiste) e `ObterAsync` (recalcula `GruposPendentes`).
+4. Atualizar o DTO `AlocacaoResponse` com `List<Guid> GruposPendentes`.
+**Validation:** Arquivo compila; teste cobre grupo 100% pago (entra), parcialmente pago (fica em `GruposPendentes`) e sem participantes (ignorado).
 **Status:** [ ] pending
 
 ### Task 8: Criar AlocacoesController

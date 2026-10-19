@@ -1,3 +1,9 @@
+---
+name: gestao-jogos
+status: verified
+references: V1
+---
+
 # Spec 50: Gestão de Jogos — Requirements
 
 ## Value Delivery

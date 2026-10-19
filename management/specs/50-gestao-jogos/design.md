@@ -76,11 +76,13 @@ public class JogoService
     Task<List<JogoResponse>> ListarAsync();
     Task<JogoResponse?> ObterAsync(Guid id);
     Task<JogoResponse?> AtualizarAsync(Guid id, JogoUpdateRequest req);
-    Task<bool> ExcluirAsync(Guid id);
+    Task<bool> ExcluirAsync(Guid id); // true = excluído; false = não encontrado
 }
 ```
 
-**Internal Logic:** `CriarAsync` instancia `Jogo(...)` (o domínio valida campos vazios) e persiste. `AtualizarAsync` carrega, atualiza os campos via método do domínio e salva. `ExcluirAsync` remove e salva.
+**Internal Logic:** `CriarAsync` instancia `Jogo(...)` (o domínio valida campos vazios) e persiste. `AtualizarAsync` carrega o jogo, chama `Jogo.Atualizar(competicaoCodigo, adversario, data, horarioSaida, pontoEmbarque)` e salva; retorna `null` se o jogo não existir. `ExcluirAsync` remove e salva; retorna `false` se o jogo não existir.
+
+> **Nota:** o método `Jogo.Atualizar(string competicaoCodigo, string adversario, DateTime data, TimeOnly horarioSaida, string pontoEmbarque)` deve ser adicionado ao domínio como parte deste spec (com as mesmas validações de não-vazio do construtor), pois o Spec 20 definiu apenas o construtor.
 
 **Dependencies:** `IJogoRepository`, `Jogo` (domínio).
 
@@ -130,7 +132,7 @@ backend/tests/CaronaAlvinegra.Domain.Tests/
 
 ## Testing Strategy
 
-- **JogoServiceTests** (repositório in-memory/mock): criar jogo com `Adversario` vazio lança `DomainException`; criar/obter/atualizar/excluir funciona.
+- **JogoServiceTests** (com fakes in-memory escritos à mão, sem pacote de mock — ver Spec 10): criar jogo com `Adversario` vazio lança `DomainException`; criar/obter/atualizar/excluir funciona.
 - **Build/test:** `dotnet build` e `dotnet test` com exit code 0.
 
 ## Migration / Rollback
