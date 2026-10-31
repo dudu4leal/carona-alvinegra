@@ -141,7 +141,7 @@ definirResponsavelVan(jogoId: string, vanId: string, body: DefinirResponsavelVan
 1. Ao montar/selecionar jogo: `GET /api/jogos/{id}/alocacao` (array) e `GET /api/grupos` (para mapear `grupoId` → grupo e participantes).
 2. Para cada van de cada alocação, renderizar:
    - `input` controlado "Motorista" (valor inicial `van.motorista`);
-   - `select` "Responsável" com opção `"— sem responsável —"` (`value=""`) e uma opção por participante dos grupos da van (`value=participante.id`, texto `"{nome} ({grupo.nome})"`), mais `+ Nova opção` apenas se o `responsavelId` atual não estiver na lista (mostrar como valor inválido, sem inventar opção);
+   - `select` "Responsável" com opção `"— sem responsável —"` (`value=""`) e uma opção por participante dos grupos da van (`value=participante.id`, texto `"{nome} ({grupo.nome})"`), mais uma opção extra "Responsável atual (fora dos grupos da van)" com o `responsavelId` atual quando ele não estiver entre os participantes listados (sem inventar participante);
    - botão `"Salvar"`.
 3. `Salvar` → `definirResponsavelVan(jogoId, van.id, { motorista, responsavelId: valor === '' ? '00000000-0000-0000-0000-000000000000' : valor })`.
 4. Em sucesso, substituir a van no estado local pela resposta.
@@ -149,7 +149,7 @@ definirResponsavelVan(jogoId: string, vanId: string, body: DefinirResponsavelVan
 
 **Dependencies:** `client.ts`, `types/index.ts`, React Router (jogo selecionado).
 
-**Error Handling:** mensagens 400/404 visíveis; estado local só muda após 200.
+**Error Handling:** mensagens 400/404 visíveis; estado local só muda após 200. Erro ao carregar a alocação limpa `alocacoes`/`rascunhos` para não exibir dados de outro jogo.
 
 ## Data Flow
 

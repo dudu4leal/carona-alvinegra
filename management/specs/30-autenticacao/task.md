@@ -18,7 +18,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. `dotnet add backend/src/CaronaAlvinegra.Infrastructure package Microsoft.AspNetCore.Identity.EntityFrameworkCore`
 2. `dotnet add backend/src/CaronaAlvinegra.Api package Microsoft.AspNetCore.Authentication.JwtBearer`
 **Validation:** Os pacotes aparecem nos `.csproj` corretos.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 2: Estender ApplicationDbContext para Identity
 
@@ -29,7 +29,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Editar `backend/src/CaronaAlvinegra.Infrastructure/Data/ApplicationDbContext.cs` mudando `: DbContext` para `: IdentityDbContext<IdentityUser>`.
 2. Garantir que `OnModelCreating` chama `base.OnModelCreating(modelBuilder)`.
 **Validation:** `dotnet build backend/CaronaAlvinegra.sln` termina com exit code 0.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 3: Configurar Identity no Program.cs
 
@@ -39,7 +39,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Editar `Program.cs`: adicionar `AddIdentityCore<IdentityUser>(...)` com política de senha (min 6, sem requisitos complexos) e `.AddEntityFrameworkStores<ApplicationDbContext>()`.
 **Validation:** `Program.cs` compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 4: Configurar JWT Bearer no Program.cs
 
@@ -50,7 +50,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Editar `Program.cs`: adicionar `AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(...)` com `TokenValidationParameters` lidos de `Jwt:Issuer`, `Jwt:Audience`, `Jwt:Key`.
 2. Adicionar `app.UseAuthentication()` e `app.UseAuthorization()` antes de `MapControllers()`.
 **Validation:** `Program.cs` compila e chama `UseAuthentication`/`UseAuthorization`.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 5: Criar JwtTokenService
 
@@ -61,7 +61,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/src/CaronaAlvinegra.Infrastructure/Services/JwtTokenService.cs`.
 2. Implementar `GenerateToken(IdentityUser user)` com claims `sub`/`email`, expiração e assinatura HMAC-SHA256, lendo configuração.
 **Validation:** Arquivo existe e compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 6: Criar AuthController e DTOs
 
@@ -73,7 +73,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 2. Criar `backend/src/CaronaAlvinegra.Api/Controllers/AuthController.cs` com `POST /api/auth/login` usando `UserManager` + `JwtTokenService`.
 3. Registrar `JwtTokenService` no DI (`builder.Services.AddScoped<JwtTokenService>()`).
 **Validation:** `dotnet build` compila; a rota existe.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 7: Implementar seed do usuário Jones
 
@@ -86,7 +86,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 3. Adicionar `SeedAdmin:Email`/`SeedAdmin:Password` em `appsettings.Development.json`.
 4. Adicionar `Jwt:Issuer`, `Jwt:Audience` e `Jwt:ExpirationMinutes` (480) em `appsettings.json`, sem `Jwt:Key`.
 **Validation:** Ao iniciar a API, o usuário `SeedAdmin:Email` é criado se não existir; seed é idempotente; `grep -n "SeedAdminUserAsync" backend/src/CaronaAlvinegra.Api/Program.cs` retorna uma ocorrência.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 8: Proteger rotas com [Authorize]
 
@@ -97,7 +97,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Configurar `app.MapControllers().RequireAuthorization()`; manter o `AuthController` com `[AllowAnonymous]` (o `/health` é minimal API e já é público).
 2. Garantir que `GET /health` continua público.
 **Validation:** `GET /health` responde sem token; controllers protegidos exigem token.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 9: Gerar migration AddIdentity
 
@@ -107,7 +107,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Executar `dotnet ef migrations add AddIdentity --project src/CaronaAlvinegra.Infrastructure --startup-project src/CaronaAlvinegra.Api`.
 **Validation:** Migration `AddIdentity` existe sob `Migrations/`.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 10: Criar testes do JwtTokenService
 
@@ -118,4 +118,4 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/tests/CaronaAlvinegra.Domain.Tests/JwtTokenServiceTests.cs`.
 2. Testar que `GenerateToken` retorna token não-vazio e que o token decodificado contém claims `sub` e `email`.
 **Validation:** `dotnet test backend/tests/CaronaAlvinegra.Domain.Tests` termina com exit code 0.
-**Status:** [ ] pending
+**Status:** [x] done

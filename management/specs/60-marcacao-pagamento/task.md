@@ -17,7 +17,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `backend/src/CaronaAlvinegra.Application/Interfaces/IPagamentoRepository.cs`.
 **Validation:** Arquivo existe e compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 2: Criar DTOs de Pagamento
 
@@ -27,7 +27,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `backend/src/CaronaAlvinegra.Application/Dtos/PagamentoDtos.cs` com `PagamentoResponse` e `DesmarcarPagamentoResponse`.
 **Validation:** Arquivo existe e compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 3: Implementar PagamentoRepository
 
@@ -38,7 +38,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/src/CaronaAlvinegra.Infrastructure/Repositories/PagamentoRepository.cs`.
 2. Implementar `GetByParticipanteJogoAsync` e `GetByJogoAsync`.
 **Validation:** `dotnet build backend/CaronaAlvinegra.sln` compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 4: Implementar PagamentoService
 
@@ -49,7 +49,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/src/CaronaAlvinegra.Application/Services/PagamentoService.cs`.
 2. Implementar `MarcarPagoAsync`, `DesmarcarPagoAsync` (com cálculo de reembolso de 48h) e `ListarPorJogoAsync`.
 **Validation:** Arquivo existe e compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 5: Criar PagamentosController
 
@@ -59,7 +59,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `backend/src/CaronaAlvinegra.Api/Controllers/PagamentosController.cs` com `[Authorize]` e as 3 rotas.
 **Validation:** Rotas existem; `dotnet build` compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 6: Registrar DI
 
@@ -69,7 +69,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Editar `Program.cs`: `AddScoped<IPagamentoRepository, PagamentoRepository>()` e `AddScoped<PagamentoService>()`.
 **Validation:** `Program.cs` compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 7: Criar testes do PagamentoService
 
@@ -80,4 +80,4 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/tests/CaronaAlvinegra.Domain.Tests/PagamentoServiceTests.cs`.
 2. Testar marcar pago, desmarcar ≥48h → `ReembolsoDevido=true`, desmarcar <48h → `ReembolsoDevido=false`.
 **Validation:** `dotnet test backend/tests/CaronaAlvinegra.Domain.Tests` termina com exit code 0.
-**Status:** [ ] pending
+**Status:** [x] done

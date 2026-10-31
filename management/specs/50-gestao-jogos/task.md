@@ -17,7 +17,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `backend/src/CaronaAlvinegra.Application/Interfaces/IJogoRepository.cs`.
 **Validation:** Arquivo existe e compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 2: Criar DTOs de Jogo
 
@@ -27,7 +27,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `backend/src/CaronaAlvinegra.Application/Dtos/JogoDtos.cs` com Create/Update/Response.
 **Validation:** Arquivo existe e compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 3: Implementar JogoRepository
 
@@ -38,7 +38,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/src/CaronaAlvinegra.Infrastructure/Repositories/JogoRepository.cs`.
 2. Implementar `GetAllAsync` ordenado por `Data` ascendente.
 **Validation:** `dotnet build backend/CaronaAlvinegra.sln` compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 4: Implementar JogoService
 
@@ -48,7 +48,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `backend/src/CaronaAlvinegra.Application/Services/JogoService.cs` com Criar/Listar/Obter/Atualizar/Excluir.
 **Validation:** Arquivo existe e compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 5: Criar JogosController
 
@@ -58,7 +58,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `backend/src/CaronaAlvinegra.Api/Controllers/JogosController.cs` com `[Authorize]` e as 5 rotas.
 **Validation:** Rotas existem; `dotnet build` compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 6: Registrar DI
 
@@ -68,7 +68,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Editar `Program.cs`: `AddScoped<IJogoRepository, JogoRepository>()` e `AddScoped<JogoService>()`.
 **Validation:** `Program.cs` compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 7: Criar testes do JogoService
 
@@ -79,4 +79,4 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/tests/CaronaAlvinegra.Domain.Tests/JogoServiceTests.cs`.
 2. Testar: `Adversario` vazio lança `DomainException`; criar/obter/atualizar/excluir funciona.
 **Validation:** `dotnet test backend/tests/CaronaAlvinegra.Domain.Tests` termina com exit code 0.
-**Status:** [ ] pending
+**Status:** [x] done

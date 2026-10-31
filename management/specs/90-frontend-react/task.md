@@ -19,7 +19,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 2. Instalar `axios` e `react-router-dom`.
 3. Adicionar `.gitignore` (node_modules, dist).
 **Validation:** `npm run build` termina com exit code 0.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 2: Criar tipos e cliente HTTP
 
@@ -30,7 +30,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `frontend/src/types/index.ts` com os tipos dos DTOs.
 2. Criar `frontend/src/api/client.ts` com base URL e interceptor de JWT.
 **Validation:** `tsc --noEmit` passa.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 3: Criar AuthContext
 
@@ -40,7 +40,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `frontend/src/auth/AuthContext.tsx` com login/logout e persistência do token.
 **Validation:** `tsc --noEmit` passa.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 4: Criar LoginPage
 
@@ -50,7 +50,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `frontend/src/pages/LoginPage.tsx`.
 **Validation:** `tsc --noEmit` passa; login redireciona para o shell.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 5: Criar Layout e rotas protegidas
 
@@ -60,7 +60,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `frontend/src/components/Layout.tsx` e configurar rotas protegidas no `App.tsx`.
 **Validation:** Rota sem token redireciona para `/login`.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 6: Criar tela de Grupos
 
@@ -70,7 +70,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `frontend/src/pages/GruposPage.tsx` (listar/criar/editar/excluir).
 **Validation:** `tsc --noEmit` passa.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 7: Criar tela de Participantes
 
@@ -80,7 +80,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `frontend/src/pages/ParticipantesPage.tsx` (listar/criar/editar/excluir, com seleção de grupo).
 **Validation:** `tsc --noEmit` passa.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 8: Criar tela de Jogos
 
@@ -90,7 +90,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `frontend/src/pages/JogosPage.tsx`.
 **Validation:** `tsc --noEmit` passa.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 9: Criar tela de Pagamentos
 
@@ -102,7 +102,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 2. Carregar `GET /api/participantes` + `GET /api/jogos/{id}/pagamentos`, cruzar por `participanteId` e renderizar uma linha por participante (nome + grupo) com estado pago/não pago (sem registro = não pago).
 3. Chamar `POST .../marcar-pago` e `POST .../desmarcar-pago`; ao desmarcar, ler `reembolsoDevido` e exibir o aviso correspondente ("reembolso devido" / "sem reembolso").
 **Validation:** `tsc --noEmit` passa; um participante sem registro pode ser marcado como pago e a linha atualiza; o aviso de reembolso reflete `reembolsoDevido`.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 10: Criar tela de Alocação
 
@@ -113,7 +113,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `frontend/src/pages/AlocacaoPage.tsx`.
 2. Chamar `POST /api/jogos/{id}/alocar` e `GET /api/jogos/{id}/alocacao`, armazenando a resposta tipada como `Alocacao[]` (array com uma alocação por rota) e renderizando um bloco por item (rota, vans, spin opcional, grupos escalados). Não indexar o array como se fosse um objeto único.
 **Validation:** `tsc --noEmit` passa; a tela renderiza os dois blocos de rota quando a API retorna 2 alocações.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 11: Criar tela de Lista Oficial
 
@@ -123,7 +123,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `frontend/src/pages/ListaPage.tsx` com botão copiar.
 **Validation:** `tsc --noEmit` passa.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 12: Ajustar responsividade e build final
 
@@ -134,4 +134,4 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Ajustar CSS responsivo.
 2. Executar `npm run build`.
 **Validation:** Build termina com exit code 0.
-**Status:** [ ] pending
+**Status:** [x] done

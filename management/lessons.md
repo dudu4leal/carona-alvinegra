@@ -40,4 +40,30 @@ Se o erro persistir após definir as variáveis, rodar `dotnet build-server shut
 
 ---
 
+## L3: Npgsql rejeita `DateTime` não-UTC em `timestamp with time zone`
+
+**Date:** 2026-10-31
+**Category:** persistence
+
+**Problem:** `Jogos.Data` é mapeada por convenção para `timestamp with time zone`. Um JSON de data sem fuso (`"2026-10-07"` ou `"2026-10-07T00:00:00"`) desserializa como `DateTimeKind.Unspecified`; o Npgsql 9 rejeita esse valor no `SaveChanges` (`Cannot write DateTime with Kind=Unspecified...`), fazendo o `POST /api/jogos` falhar com 500.
+
+**Solution:** Normalizar para UTC no `JogoService` antes de criar/atualizar: `Utc` permanece, `Local` usa `ToUniversalTime()`, `Unspecified` recebe `DateTime.SpecifyKind(data, DateTimeKind.Utc)`. A parte de data do calendário é preservada (00:00Z).
+
+**Takeaway:** Qualquer propriedade `DateTime` persistida em PostgreSQL via Npgsql deve chegar ao `SaveChanges` como `Kind=Utc`. Normalizar no caso de uso (Application) e cobrir com teste a conversão de `Unspecified`.
+
+---
+
+## L4: Horário de saída é horário local de Brasília, não UTC
+
+**Date:** 2026-10-31
+**Category:** business-rule
+
+**Problem:** `Jogo.Data` é persistida em UTC (L3), mas `HorarioSaida` é um horário de calendário local (Petrópolis, UTC-3). Comparar `DateTime.Now` com `Jogo.Data.Date + HorarioSaida` faz a janela de 48h depender do fuso do servidor: num container em UTC, o corte erra em 3 horas.
+
+**Solution:** No `PagamentoService`, converter o momento do jogo para UTC explicitamente (`momentoLocal - (-3h)`) e comparar com `DateTime.UtcNow`.
+
+**Takeaway:** Nunca comparar horários de calendário locais com `DateTime.Now`/`UtcNow` sem explicitar o fuso. O app é de Petrópolis: horário de Brasília = UTC-3, sem DST desde 2019.
+
+---
+
 (Add more lessons as they are discovered during development.)

@@ -10,6 +10,7 @@ Seguir o padrão dos Specs 40/50 (interface de repositório → implementação 
 - **Upsert na marcação:** `MarcarPagoAsync` cria ou atualiza o registro (idempotente).
 - **Regra de reembolso no service**, usando `Jogo` para calcular a janela de 48h.
 - **Reposição de vaga é decisão manual do Jones** (não automatizada).
+- **Fuso horário explícito:** "horário de saída" é horário de Brasília (UTC-3, sem horário de verão desde 2019); o service converte o momento do jogo para UTC e compara com `DateTime.UtcNow`, independente do fuso do servidor.
 
 ## Component / Module Breakdown
 
@@ -72,18 +73,18 @@ public record DesmarcarPagamentoResponse(bool ReembolsoDevido);
 ```csharp
 public class PagamentoService
 {
-    Task<PagamentoResponse> MarcarPagoAsync(Guid jogoId, Guid participanteId);
-    Task<DesmarcarPagamentoResponse> DesmarcarPagoAsync(Guid jogoId, Guid participanteId);
+    Task<PagamentoResponse?> MarcarPagoAsync(Guid jogoId, Guid participanteId);
+    Task<DesmarcarPagamentoResponse?> DesmarcarPagoAsync(Guid jogoId, Guid participanteId);
     Task<List<PagamentoResponse>> ListarPorJogoAsync(Guid jogoId);
 }
 ```
 
 **Internal Logic:**
-- `MarcarPagoAsync`: busca pagamento por `(participanteId, jogoId)`; se não existir, cria `Pagamento(participanteId, jogoId)` e `MarcarPago()`; senão `MarcarPago()`; salva.
-- `DesmarcarPagoAsync`: busca pagamento por `(participanteId, jogoId)`; se **não existir**, retorna `DesmarcarPagamentoResponse(ReembolsoDevido: false)` sem criar registro; se existir, `DesmarcarPago()` + salva e calcula `ReembolsoDevido` comparando `DateTime.Now` com `(jogo.Data.Date + jogo.HorarioSaida) - 48h`.
+- `MarcarPagoAsync`: valida que jogo e participante existem; se algum não existir, retorna `null` (404 no controller). Busca pagamento por `(participanteId, jogoId)`; se não existir, cria `Pagamento(participanteId, jogoId)` e `MarcarPago()`; senão `MarcarPago()`; salva.
+- `DesmarcarPagoAsync`: se o jogo não existir, retorna `null` (404). Busca pagamento por `(participanteId, jogoId)`; se **não existir**, retorna `DesmarcarPagamentoResponse(ReembolsoDevido: false)` sem criar registro; se existir, `DesmarcarPago()` + salva e calcula `ReembolsoDevido` comparando `DateTime.UtcNow` com o momento do jogo (horário de Brasília convertido para UTC) menos 48h.
 - `ListarPorJogoAsync`: retorna pagamentos do jogo.
 
-**Dependencies:** `IPagamentoRepository`, `IJogoRepository`, `Pagamento`, `Jogo`.
+**Dependencies:** `IPagamentoRepository`, `IJogoRepository`, `IParticipanteRepository`, `Pagamento`, `Jogo`.
 
 **Error Handling:** `DomainException` propagada; participante/jogo inexistente → erro de aplicação (404 no controller).
 

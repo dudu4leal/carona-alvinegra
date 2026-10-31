@@ -1,9 +1,11 @@
 using CaronaAlvinegra.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace CaronaAlvinegra.Infrastructure.Data;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext<IdentityUser>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
@@ -14,6 +16,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Jogo> Jogos => Set<Jogo>();
     public DbSet<Pagamento> Pagamentos => Set<Pagamento>();
     public DbSet<ListaEspera> ListasEspera => Set<ListaEspera>();
+    public DbSet<Alocacao> Alocacoes => Set<Alocacao>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

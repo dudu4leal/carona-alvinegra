@@ -21,7 +21,7 @@ Tasks MUST be executed sequentially in numerical order. Domain → DTO → servi
 - [ ] `grep -n "DefinirResponsavel" backend/src/CaronaAlvinegra.Domain/Entities/VanAlocada.cs` retorna 1 ocorrência.
 - [ ] O método não altera `GrupoIds` nem `Ocupacao`.
 - [ ] `dotnet build backend/CaronaAlvinegra.sln` conclui sem erros.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 2: Adicionar `DefinirResponsavelVanRequest`
 
@@ -32,7 +32,7 @@ Tasks MUST be executed sequentially in numerical order. Domain → DTO → servi
 1. Editar `backend/src/CaronaAlvinegra.Application/Dtos/AlocacaoDtos.cs` adicionando `public record DefinirResponsavelVanRequest(string Motorista, Guid ResponsavelId);`.
 **Validation:**
 - [ ] `grep -n "DefinirResponsavelVanRequest" backend/src/CaronaAlvinegra.Application/Dtos/AlocacaoDtos.cs` retorna 1 ocorrência.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 3: Implementar `DefinirResponsavelVanAsync`
 
@@ -46,7 +46,7 @@ Tasks MUST be executed sequentially in numerical order. Domain → DTO → servi
 **Validation:**
 - [ ] `grep -n "DefinirResponsavelVanAsync" backend/src/CaronaAlvinegra.Application/Services/AlocacaoService.cs` retorna 1 ocorrência.
 - [ ] `dotnet test backend/tests/CaronaAlvinegra.Domain.Tests` termina com exit code 0.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 4: Adicionar ação PUT no `AlocacoesController`
 
@@ -60,7 +60,7 @@ Tasks MUST be executed sequentially in numerical order. Domain → DTO → servi
 - [ ] `grep -n "alocacao/vans/{vanId}" backend/src/CaronaAlvinegra.Api/Controllers/AlocacoesController.cs` retorna 1 ocorrência.
 - [ ] `dotnet build backend/CaronaAlvinegra.sln` conclui sem erros.
 - [ ] Com a API rodando, `PUT` sem token retorna 401.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 5: Adicionar tipo e chamada no cliente HTTP
 
@@ -72,7 +72,7 @@ Tasks MUST be executed sequentially in numerical order. Domain → DTO → servi
 2. Adicionar `definirResponsavelVan(jogoId, vanId, body): Promise<VanAlocada>` em `frontend/src/api/client.ts` fazendo `api.put('/api/jogos/' + jogoId + '/alocacao/vans/' + vanId, body)`.
 **Validation:**
 - [ ] `cd frontend && npx tsc --noEmit` passa.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 6: Editar `AlocacaoPage`
 
@@ -88,7 +88,7 @@ Tasks MUST be executed sequentially in numerical order. Domain → DTO → servi
 - [ ] `cd frontend && npm run build` termina com exit code 0.
 - [ ] A tela mostra os campos por van e o botão "Salvar".
 - [ ] Salvar uma van atualiza o nome do responsável sem recarregar a página.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 7: Validar o fluxo completo
 
@@ -104,4 +104,4 @@ Tasks MUST be executed sequentially in numerical order. Domain → DTO → servi
 - [ ] `PUT` com responsável de outro grupo retorna 400.
 - [ ] `PUT` com `vanId` inexistente retorna 404.
 - [ ] Nenhuma migration nova.
-**Status:** [ ] pending
+**Status:** [x] done

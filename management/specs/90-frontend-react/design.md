@@ -11,6 +11,8 @@ App SPA em **Vite + React + TypeScript**, consumindo a API REST. Estado local + 
 - **Axios** como cliente HTTP, com interceptor de token.
 - **Token no `localStorage`**, removido no logout.
 - **CSS simples** (sem framework UI pesado), com layout responsivo.
+- **`tsconfig.json` único** (inclui `src`) e `ProtectedRoute` definido em `App.tsx` (sem arquivo extra).
+- **Respostas assíncronas ordenadas por sequência:** telas que disparam GET + ação (Alocação/Pagamentos) descartam respostas antigas via contador `useRef`.
 
 ## Component / Module Breakdown
 
@@ -18,9 +20,9 @@ App SPA em **Vite + React + TypeScript**, consumindo a API REST. Estado local + 
 
 **Purpose:** Cliente HTTP com token.
 
-**Interface:** `api.get/post/put/del` (instância axios).
+**Interface:** `api.get/post/put/delete` (instância axios).
 
-**Internal Logic:** `baseURL` de `import.meta.env.VITE_API_URL` (default `http://localhost:5000`). Interceptor adiciona `Authorization: Bearer <token>`; em resposta 401, limpa o token e redireciona para `/login`.
+**Internal Logic:** `baseURL` de `import.meta.env.VITE_API_URL` (default `http://localhost:5000`). Interceptor adiciona `Authorization: Bearer <token>`; em resposta 401, limpa o token e redireciona para `/login` — exceto no próprio login, cujo 401 vira a mensagem "E-mail ou senha inválidos." na tela.
 
 **Dependencies:** `axios`.
 
@@ -55,10 +57,10 @@ App SPA em **Vite + React + TypeScript**, consumindo a API REST. Estado local + 
 **Internal Logic:**
 - `LoginPage`: formulário e-mail/senha → `login()`.
 - `GruposPage`: tabela + form (nome, rota) + excluir (com tratamento de 409).
-- `ParticipantesPage`: tabela + form (nome, whatsapp, grupo) + excluir.
+- `ParticipantesPage`: tabela + form (nome, whatsapp, grupo) + excluir; carrega `GET /api/grupos` para a seleção.
 - `JogosPage`: tabela + form (código, adversário, data, saída, embarque) + excluir.
-- `PagamentosPage`: seleção de jogo → carrega `GET /api/participantes` e `GET /api/jogos/{id}/pagamentos`, cruza por `participanteId` e exibe **uma linha por participante** (nome + grupo) com estado pago/não pago (ausência de registro = não pago) + botões marcar/desmarcar; ao desmarcar, mostra `reembolsoDevido`.
-- `AlocacaoPage`: seleção de jogo → botão "Alocar" → exibe `Alocacao[]` (um bloco por rota, com vans/spin/escalados/pendentes); `GET .../alocacao` também retorna array (404 → estado vazio, não erro).
+- `PagamentosPage`: seleção de jogo → carrega `GET /api/participantes`, `GET /api/grupos` e `GET /api/jogos/{id}/pagamentos`, cruza por `participanteId` e exibe **uma linha por participante** (nome + grupo) com estado pago/não pago (ausência de registro = não pago) + botões marcar/desmarcar; ao desmarcar, mostra `reembolsoDevido`.
+- `AlocacaoPage`: seleção de jogo → botão "Alocar" → exibe `Alocacao[]` (um bloco por rota, com vans/spin/escalados/pendentes); `GET .../alocacao` também retorna array (404 → estado vazio, não erro); carrega `GET /api/grupos` para exibir nomes.
 - `ListaPage`: seleção de jogo → botão "Gerar lista" → exibe texto + botão copiar.
 
 **Dependencies:** `api/client.ts`, DTOs/tipos.

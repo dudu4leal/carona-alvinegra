@@ -41,9 +41,9 @@ public class JwtTokenService
 }
 ```
 
-**Internal Logic:** Lê `Jwt:Key`, `Jwt:Issuer`, `Jwt:Audience`, `Jwt:ExpirationMinutes`; cria `SymmetricSecurityKey` a partir da chave; monta `JwtSecurityToken` com claims `sub` (user.Id), `email` (user.Email) e expiração; assina com `HmacSha256` e retorna `JwtSecurityTokenHandler().WriteToken(...)`.
+**Internal Logic:** Lê `Jwt:Key`, `Jwt:Issuer`, `Jwt:Audience`, `Jwt:ExpirationMinutes` (ausente ou inválido usa 480); cria `SymmetricSecurityKey` a partir da chave; monta `JwtSecurityToken` com claims `sub` (user.Id), `email` (user.Email) e expiração; assina com `HmacSha256` e retorna `JwtSecurityTokenHandler().WriteToken(...)`.
 
-**Dependencies:** `Microsoft.AspNetCore.Authentication.JwtBearer`, `Microsoft.IdentityModel.Tokens`, `System.IdentityModel.Tokens.Jwt`.
+**Dependencies:** `System.IdentityModel.Tokens.Jwt` (referenciado pela Infrastructure; traz `Microsoft.IdentityModel.Tokens` transitivamente). `Microsoft.AspNetCore.Authentication.JwtBearer` fica na Api, onde é usado para validação.
 
 **Error Handling:** Se `Jwt:Key` estiver ausente/vazia, lança `InvalidOperationException` com mensagem clara.
 
@@ -130,7 +130,7 @@ builder.Services.AddAuthorization();
 
 **Dependencies:** Identity, JwtBearer, `ApplicationDbContext`.
 
-**Error Handling:** N/A.
+**Error Handling:** `Jwt:Key` ausente lança `InvalidOperationException` antes de `builder.Build()` (fail-fast; a mensagem indica `appsettings.Development.json` ou `Jwt__Key`). Assim o processo não sobe num ambiente sem chave.
 
 ## Data Flow
 
@@ -168,6 +168,7 @@ backend/src/CaronaAlvinegra.Infrastructure/
 
 backend/src/CaronaAlvinegra.Api/
 ├── Program.cs                          (editar: Identity + JWT + seed)
+├── AdminSeeder.cs                      (novo: extension SeedAdminUserAsync)
 ├── Controllers/AuthController.cs       (novo)
 ├── Contracts/LoginRequest.cs           (novo)
 ├── Contracts/LoginResponse.cs          (novo)
@@ -175,12 +176,13 @@ backend/src/CaronaAlvinegra.Api/
 └── appsettings.Development.json        (editar: Jwt + SeedAdmin)
 
 backend/tests/CaronaAlvinegra.Domain.Tests/
-└── JwtTokenServiceTests.cs             (novo)
+└── JwtTokenServiceTests.cs             (novo; o projeto passa a referenciar a Infrastructure
+                                        e o pacote Microsoft.Extensions.Configuration)
 ```
 
 ## Testing Strategy
 
-- **JwtTokenServiceTests:** `GenerateToken` retorna string não-vazia; o token decodificado contém claims `sub` e `email`.
+- **JwtTokenServiceTests:** `GenerateToken` retorna string não-vazia; o token decodificado contém claims `sub` e `email`; sem `Jwt:Key` lança `InvalidOperationException` com mensagem contendo `Jwt:Key`.
 - **Login (manual/integração opcional):** credenciais do seed retornam 200; credenciais erradas retornam 401.
 - **Build/test:** `dotnet build` e `dotnet test` com exit code 0.
 

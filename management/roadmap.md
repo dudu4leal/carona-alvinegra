@@ -21,15 +21,15 @@
 |---|---|---|---|
 | 10 | fundacao-backend | audited | V5 |
 | 20 | modelo-dominio | audited | V5 |
-| 30 | autenticacao | verified | V4 |
-| 40 | crud-participantes-grupos | verified | V1 |
-| 50 | gestao-jogos | verified | V1 |
-| 60 | marcacao-pagamento | verified | V1 |
-| 70 | algoritmo-alocacao | verified | V2 |
-| 80 | lista-oficial | verified | V3 |
-| 90 | frontend-react | verified | V6 |
+| 30 | autenticacao | audited | V4 |
+| 40 | crud-participantes-grupos | audited | V1 |
+| 50 | gestao-jogos | audited | V1 |
+| 60 | marcacao-pagamento | audited | V1 |
+| 70 | algoritmo-alocacao | audited | V2 |
+| 80 | lista-oficial | audited | V3 |
+| 90 | frontend-react | audited | V6 |
 | 100 | deploy | verified | V7 |
-| 110 | atribuicao-responsavel-van | verified | V3 |
+| 110 | atribuicao-responsavel-van | audited | V3 |
 
 ---
 

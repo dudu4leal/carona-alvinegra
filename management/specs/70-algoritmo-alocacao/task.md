@@ -19,7 +19,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 2. Criar `backend/src/CaronaAlvinegra.Domain/Entities/SpinAlocado.cs`.
 3. Criar `backend/src/CaronaAlvinegra.Domain/Entities/Alocacao.cs` (aggregate com Vans/Spin/GruposEscalados).
 **Validation:** Arquivos existem e `dotnet build` compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 2: Implementar Alocador
 
@@ -30,7 +30,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/src/CaronaAlvinegra.Domain/Services/Alocador.cs`.
 2. Implementar first-fit decrescente, separação de sobras, spin/escalação e promoção.
 **Validation:** `dotnet build` compila; lógica segue o design.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 3: Criar testes do Alocador
 
@@ -41,7 +41,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/tests/CaronaAlvinegra.Domain.Tests/AlocadorTests.cs`.
 2. Implementar os 7 casos de teste do design.
 **Validation:** `dotnet test backend/tests/CaronaAlvinegra.Domain.Tests` termina com exit code 0.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 4: Criar DTOs de alocação
 
@@ -51,7 +51,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `backend/src/CaronaAlvinegra.Application/Dtos/AlocacaoDtos.cs`.
 **Validation:** Arquivo existe e compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 5: Criar IAlocacaoRepository e AlocacaoRepository
 
@@ -64,7 +64,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 3. Criar `backend/src/CaronaAlvinegra.Application/Interfaces/IListaEsperaRepository.cs` (com `GetByJogoRotaAsync`).
 4. Criar `backend/src/CaronaAlvinegra.Infrastructure/Repositories/ListaEsperaRepository.cs`.
 **Validation:** `dotnet build backend/CaronaAlvinegra.sln` compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 6: Criar mappings e migration
 
@@ -75,7 +75,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Adicionar configurações/mappings para Alocacao/VanAlocada/SpinAlocado no `ApplicationDbContext`.
 2. Executar `dotnet ef migrations add AddAlocacao --project src/CaronaAlvinegra.Infrastructure --startup-project src/CaronaAlvinegra.Api`.
 **Validation:** Migration `AddAlocacao` existe sob `Migrations/`.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 7: Implementar AlocacaoService
 
@@ -88,7 +88,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 3. Implementar `AlocarJogoAsync` (rotas de confirmados ∪ pendentes, chama Alocador por rota, remove antigas, persiste) e `ObterAsync` (recalcula `GruposPendentes`).
 4. Atualizar o DTO `AlocacaoResponse` com `List<Guid> GruposPendentes`.
 **Validation:** Arquivo compila; teste cobre grupo 100% pago (entra), parcialmente pago (fica em `GruposPendentes`) e sem participantes (ignorado).
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 8: Criar AlocacoesController
 
@@ -98,7 +98,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `backend/src/CaronaAlvinegra.Api/Controllers/AlocacoesController.cs` com `[Authorize]`, `POST .../alocar` e `GET .../alocacao`.
 **Validation:** Rotas existem; `dotnet build` compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 9: Registrar DI
 
@@ -108,4 +108,4 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Editar `Program.cs`: `AddScoped<IAlocacaoRepository, AlocacaoRepository>()` e `AddScoped<AlocacaoService>()`.
 **Validation:** `Program.cs` compila.
-**Status:** [ ] pending
+**Status:** [x] done

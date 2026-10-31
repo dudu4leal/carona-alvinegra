@@ -18,7 +18,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/src/CaronaAlvinegra.Application/Interfaces/IGrupoRepository.cs`.
 2. Criar `backend/src/CaronaAlvinegra.Application/Interfaces/IParticipanteRepository.cs` (com `CountByGrupoAsync`).
 **Validation:** Os arquivos existem e `dotnet build` compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 2: Criar DTOs
 
@@ -29,7 +29,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/src/CaronaAlvinegra.Application/Dtos/GrupoDtos.cs` (records Create/Update/Response).
 2. Criar `backend/src/CaronaAlvinegra.Application/Dtos/ParticipanteDtos.cs` (records Create/Update/Response).
 **Validation:** Arquivos existem e compilam.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 3: Implementar repositórios EF Core
 
@@ -40,7 +40,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/src/CaronaAlvinegra.Infrastructure/Repositories/GrupoRepository.cs` (com `.Include(g => g.Participantes)` em `GetByIdAsync` e `GetAllAsync`).
 2. Criar `backend/src/CaronaAlvinegra.Infrastructure/Repositories/ParticipanteRepository.cs` (incluindo `CountByGrupoAsync` e filtro por `grupoId`).
 **Validation:** `dotnet build backend/CaronaAlvinegra.sln` compila; `grep -n "Include" backend/src/CaronaAlvinegra.Infrastructure/Repositories/GrupoRepository.cs` retorna 2 ocorrências.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 4: Implementar GrupoService
 
@@ -51,7 +51,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/src/CaronaAlvinegra.Application/Services/GrupoService.cs` com Criar/Listar/Obter/Atualizar/Excluir.
 2. `ExcluirAsync` retorna conflito se o grupo tem participantes.
 **Validation:** Arquivo existe e compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 5: Implementar ParticipanteService
 
@@ -62,7 +62,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/src/CaronaAlvinegra.Application/Services/ParticipanteService.cs`.
 2. Validar existência do grupo e capacidade (`CountByGrupoAsync >= Grupo.CapacidadeMaxima` → `DomainException`).
 **Validation:** Arquivo existe e compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 6: Criar middleware de DomainException
 
@@ -73,7 +73,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/src/CaronaAlvinegra.Api/Middleware/DomainExceptionMiddleware.cs`.
 2. Registrar no `Program.cs` (`app.UseMiddleware<DomainExceptionMiddleware>()`).
 **Validation:** `DomainException` retorna 400 com mensagem.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 7: Criar GruposController
 
@@ -83,7 +83,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `backend/src/CaronaAlvinegra.Api/Controllers/GruposController.cs` com `[Authorize]` e as 5 rotas.
 **Validation:** Rotas existem; `dotnet build` compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 8: Criar ParticipantesController
 
@@ -93,7 +93,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Criar `backend/src/CaronaAlvinegra.Api/Controllers/ParticipantesController.cs` com `[Authorize]` e as 5 rotas (filtro `?grupoId=`).
 **Validation:** Rotas existem; `dotnet build` compila.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 9: Registrar DI
 
@@ -103,7 +103,7 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 **Actions:**
 1. Editar `Program.cs`: `AddScoped<IGrupoRepository, GrupoRepository>()`, `AddScoped<IParticipanteRepository, ParticipanteRepository>()`, `AddScoped<GrupoService>()`, `AddScoped<ParticipanteService>()`.
 **Validation:** `Program.cs` compila e os services são resolvíveis.
-**Status:** [ ] pending
+**Status:** [x] done
 
 ### Task 10: Criar testes de caso de uso
 
@@ -114,4 +114,4 @@ Tasks MUST be executed sequentially in numerical order. Each task depends on the
 1. Criar `backend/tests/CaronaAlvinegra.Domain.Tests/ParticipanteServiceTests.cs` (fakes in-memory escritos à mão, sem pacote de mock — ver Spec 10).
 2. Testar 15 OK, 16º lança `DomainException`, excluir grupo com participantes retorna conflito.
 **Validation:** `dotnet test backend/tests/CaronaAlvinegra.Domain.Tests` termina com exit code 0.
-**Status:** [ ] pending
+**Status:** [x] done

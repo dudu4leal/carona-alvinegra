@@ -61,7 +61,7 @@ public class VanAlocada
 }
 ```
 
-**Internal Logic:** Guarda os `GrupoIds` e a ocupação calculada.
+**Internal Logic:** Guarda os `GrupoIds` e a ocupação calculada. Possui construtor privado sem parâmetros para materialização do EF (a coleção é persistida via backing field JSON).
 
 **Dependencies:** Nenhuma.
 
@@ -83,7 +83,7 @@ public class SpinAlocado
 }
 ```
 
-**Internal Logic:** Guarda `GrupoIds` e ocupação.
+**Internal Logic:** Guarda `GrupoIds` e ocupação. Possui construtor privado sem parâmetros para materialização do EF (a coleção é persistida via backing field JSON).
 
 **Dependencies:** Nenhuma.
 
@@ -107,6 +107,8 @@ public class Alocador
 3. Separar vans justificadas (`ocupacao >= 12`) das sobras (`ocupacao < 12`).
 4. Achatar os grupos das vans-sobra em `sobra`. Se `soma(sobra) <= Spin.Capacidade (6)` → criar `SpinAlocado`; senão → `Escalar(grupoId)` para cada grupo da sobra.
 5. Promoção: se existe spin e `spin.Ocupacao + tamanhoListaEspera >= 12`, remover o spin e criar uma `VanAlocada` promovida com os grupos do spin e `Ocupacao = spin.Ocupacao + tamanhoListaEspera` (a lista de espera é movida para a van promovida pelo `AlocacaoService`).
+
+> **Limitação conhecida:** se `spin.Ocupacao + tamanhoListaEspera > Van.Capacidade (15)`, a van promovida excede 15 lugares (FR-006 manda usar a soma). Na v1 a lista de espera é sempre vazia (Constraints), então o caso não ocorre em produção; um futuro CRUD de espera deverá tratar o excedente.
 
 **Preenchimento de Motorista/Responsável:** o `Alocador` cria toda `VanAlocada` com `Motorista = ""` e `ResponsavelId = Guid.Empty` (o algoritmo não tem esses dados). O preenchimento posterior é responsabilidade do **Spec 110** (`PUT /api/jogos/{jogoId}/alocacao/vans/{vanId}` + campo na `AlocacaoPage`); reexecutar a alocação zera esses valores.
 
@@ -161,8 +163,8 @@ public interface IListaEsperaRepository
 ```csharp
 public class AlocacaoService
 {
-    Task<List<AlocacaoResponse>> AlocarJogoAsync(Guid jogoId);
-    Task<List<AlocacaoResponse>> ObterAsync(Guid jogoId);
+    Task<List<AlocacaoResponse>?> AlocarJogoAsync(Guid jogoId);
+    Task<List<AlocacaoResponse>?> ObterAsync(Guid jogoId);
 }
 ```
 
@@ -180,7 +182,7 @@ public class AlocacaoService
 
 **Dependencies:** `Alocador`, `IGrupoRepository`, `IAlocacaoRepository`, `IListaEsperaRepository`, `IJogoRepository`, `IPagamentoRepository` (Spec 60, somente leitura).
 
-**Error Handling:** Jogo inexistente → erro de aplicação (404 no controller).
+**Error Handling:** Jogo inexistente → retorna `null` (404 no controller). **DI:** registrar `IAlocacaoRepository`, `IListaEsperaRepository`, `Alocador` e `AlocacaoService`.
 
 ### Componente: `AlocacoesController` (Api)
 
@@ -221,7 +223,7 @@ public record AlocacaoResponse(Guid Id, Guid JogoId, Rota Rota, List<VanAlocadaR
 
 ## Data Structures
 
-- **Tabelas novas:** `Alocacoes` (Id, JogoId, Rota), `VansAlocadas` (Id, AlocacaoId, Motorista, ResponsavelId), `SpinsAlocados` (Id, AlocacaoId, Ocupacao). As listas de `GrupoIds` (e `GruposEscalados`) são persistidas como **JSON** (coluna de texto) via `HasConversion`, consistente com o Spec 20.
+- **Tabelas novas:** `Alocacoes` (Id, JogoId, Rota, GruposEscalados JSON), `VansAlocadas` (Id, AlocacaoId, Motorista, ResponsavelId, Ocupacao, GrupoIds JSON), `SpinsAlocados` (Id, AlocacaoId, Ocupacao, GrupoIds JSON). `Alocacoes.JogoId` tem FK cascade para `Jogos`. As listas de `GrupoIds` (e `GruposEscalados`) são persistidas como **JSON** (coluna de texto) via `HasConversion`, consistente com o Spec 20.
 - **`GruposPendentes` NÃO é persistido**: é calculado em cada resposta a partir de `Pagamentos` (`JogoId` + `Pago`).
 - **`GruposEscalados`** é persistido como JSON na `Alocacao`.
 - **Constantes:** `Van.Capacidade = 15`, `Spin.Capacidade = 6`, `Grupo.CapacidadeMaxima = 15`.
@@ -264,6 +266,7 @@ Casos do `AlocadorTests` (determinísticos):
 - Grupos `[8,8,6]` → 1 van (14) + 1 grupo escalado (8).
 - Grupos `[6]` → 1 spin (6) [rota < 12].
 - Grupos `[6]` + lista de espera 6 → promoção (1 van 12, sem spin).
+- Grupos `[6]` + lista de espera 5 → spin permanece (11 < 12, sem promoção).
 - Grupos `[10]` → 1 grupo escalado (10).
 
 Casos do `AlocacaoServiceTests` (Application, com fakes in-memory escritos à mão — ver Spec 10):
@@ -271,6 +274,8 @@ Casos do `AlocacaoServiceTests` (Application, com fakes in-memory escritos à m�
 - Grupo com 1 participante sem pagamento → não entra e aparece em `GruposPendentes` da rota.
 - Grupo sem participantes → ignorado (não entra nem em `GruposPendentes`).
 - `ObterAsync` recalcula `GruposPendentes` após alteração de pagamentos.
+- Reexecutar `AlocarJogoAsync` → não duplica alocações (remove as antigas e regrava).
+- Jogo inexistente → `null` (404 no controller).
 
 ## Migration / Rollback
 

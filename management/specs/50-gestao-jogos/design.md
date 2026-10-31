@@ -9,6 +9,7 @@ Seguir o mesmo padrão do Spec 40 (interface de repositório → implementação
 - **`Jogo` é aggregate root** (Spec 20), com repositório e CRUD próprios.
 - **Ordenação da listagem por `Data` ascendente** (próximos jogos primeiro), útil para o Jones e para o cabeçalho da lista.
 - **Reutilização do middleware `DomainExceptionMiddleware`** (Spec 40) para mapear regras de domínio para 400.
+- **`Data` persistida em UTC:** Npgsql mapeia `DateTime` para `timestamp with time zone` e só aceita `DateTimeKind.Utc`; o `JogoService` normaliza `Data` antes de criar/atualizar (`Unspecified` → UTC, `Local` → UTC). A parte de data do calendário é preservada para os Specs 80/90.
 
 ## Component / Module Breakdown
 
@@ -132,7 +133,7 @@ backend/tests/CaronaAlvinegra.Domain.Tests/
 
 ## Testing Strategy
 
-- **JogoServiceTests** (com fakes in-memory escritos à mão, sem pacote de mock — ver Spec 10): criar jogo com `Adversario` vazio lança `DomainException`; criar/obter/atualizar/excluir funciona.
+- **JogoServiceTests** (com fakes in-memory escritos à mão, sem pacote de mock — ver Spec 10): criar jogo com `Adversario` vazio lança `DomainException`; criar/obter/atualizar/excluir funciona; criar/atualizar com `Data` sem fuso normaliza para UTC.
 - **Build/test:** `dotnet build` e `dotnet test` com exit code 0.
 
 ## Migration / Rollback

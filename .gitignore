@@ -21,3 +21,8 @@ NOTICE
 # --- Backups automáticos do fluxo SDD (/spec-verify, /spec-audit) ---
 # São artefatos temporários de correção, não fazem parte dos specs.
 *.bak.*
+
+# --- Lockfile do frontend (produto) ---
+# O padrão package-lock.json acima ignora o lockfile da ferramenta DsCode;
+# esta negação mantém o lockfile do produto versionado (necessário para npm ci).
+!frontend/package-lock.json

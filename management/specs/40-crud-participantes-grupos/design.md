@@ -10,6 +10,7 @@ Implementar o padrão DDD tático completo para os dois recursos: **interfaces d
 - **Fonte única do número 15:** a constante `Grupo.CapacidadeMaxima` (Spec 20) é usada em toda validação (DRY).
 - **`DomainException` → 400** via `[ApiController]` + um middleware/filtro simples, para não vazar stack trace.
 - **Excluir grupo com participantes retorna 409** (não cascade), evitando perda acidental de dados.
+- **Mutação encapsulada no domínio:** para viabilizar `AtualizarAsync` sem expor setters, este spec adiciona `Grupo.Atualizar(nome, rota)` e `Participante.Atualizar(nome, whatsApp, grupoId)`. Ambos reutilizam a validação do construtor e não alteram o schema.
 
 ## Component / Module Breakdown
 
@@ -164,6 +165,9 @@ public class ParticipanteService
 ## File / Module Layout
 
 ```
+backend/src/CaronaAlvinegra.Domain/
+└── Entities/Grupo.cs, Participante.cs     (editar: mutators Atualizar)
+
 backend/src/CaronaAlvinegra.Application/
 ├── Interfaces/IGrupoRepository.cs          (novo)
 ├── Interfaces/IParticipanteRepository.cs   (novo)
@@ -188,7 +192,7 @@ backend/tests/CaronaAlvinegra.Domain.Tests/
 
 ## Testing Strategy
 
-- **ParticipanteServiceTests** (com fakes in-memory escritos à mão, sem pacote de mock — ver Spec 10): criar até 15 OK; 16º lança `DomainException`; mover para grupo cheio lança `DomainException`; excluir grupo com participantes retorna conflito.
+- **ParticipanteServiceTests** (com fakes in-memory escritos à mão, sem pacote de mock — ver Spec 10): criar até 15 OK; 16º lança `DomainException`; mover para grupo cheio lança `DomainException`; atualizar participante no mesmo grupo cheio não lança (não consome nova vaga); criar em grupo inexistente lança `DomainException`; excluir grupo com participantes retorna conflito.
 - **Build/test:** `dotnet build` e `dotnet test` com exit code 0.
 
 ## Migration / Rollback

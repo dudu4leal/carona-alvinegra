@@ -7,9 +7,10 @@ A geração da lista é uma **formatação de saída pura** (sem regra de negóc
 ## Architecture Decisions
 
 - **Serviço na Application** (não no Domain) — é apresentação/formatação, não regra de negócio.
-- **Rodapé e emojis como constantes** únicas (DRY).
-- **Numeração global das vans** (1, 2, 3, ...) na ordem de processamento das rotas.
+- **Rodapé e emojis como constantes** únicas (DRY): `Rodape`, `EmojiAviao`, `EmojiVan`, `EmojiCheck`.
+- **Numeração global das vans** (1, 2, 3, ...) na ordem de processamento das rotas; alocações ordenadas por `Rota` para determinismo.
 - **Responsável em primeiro** na van, com sufixo `( Resp)`.
+- **Limites de exibição:** vans limitadas a `Van.Capacidade` (15) e spin a `Spin.Capacidade` (6).
 
 ## Component / Module Breakdown
 
@@ -21,19 +22,20 @@ A geração da lista é uma **formatação de saída pura** (sem regra de negóc
 ```csharp
 public class ListaOficialService
 {
-    Task<ListaOficialResponse> GerarAsync(Guid jogoId);
+    Task<ListaOficialResponse?> GerarAsync(Guid jogoId);
 }
 ```
 
 **Internal Logic:**
-1. Carrega `Jogo` (via `IJogoRepository`); se não existir, propaga erro (404).
-2. Carrega `Alocacao`(ões) do jogo (via `IAlocacaoRepository`).
-3. Para cada van, resolve os participantes dos grupos (via `IGrupoRepository`/`IParticipanteRepository`) e ordena com o responsável primeiro.
-4. Monta cabeçalho → blocos de van → bloco spin → rodapé, concatenando com `\n`.
+1. Carrega `Jogo` (via `IJogoRepository`); se não existir, retorna `null` (404).
+2. Carrega `Alocacao`(ões) do jogo (via `IAlocacaoRepository`); se não houver, lança `DomainException` (400).
+3. Carrega os grupos com participantes (via `IGrupoRepository`) e resolve os participantes de cada van/spin; o responsável (`ResponsavelId`) vem primeiro.
+4. Ordena as alocações por `Rota` e monta cabeçalho → blocos de van (limite 15) → blocos spin (limite 6) → rodapé, com blocos separados por `\n\n`.
+5. Se nenhuma van/spin produziu participantes, lança `DomainException` (400).
 
-**Dependencies:** `IJogoRepository`, `IAlocacaoRepository`, `IGrupoRepository`, `IParticipanteRepository`.
+**Dependencies:** `IJogoRepository`, `IAlocacaoRepository`, `IGrupoRepository` (os participantes são resolvidos pelos grupos, sem consulta separada).
 
-**Error Handling:** Jogo sem alocação/participantes → lança erro de aplicação (mapeado para 400/404).
+**Error Handling:** Jogo inexistente → `null` (404). Sem alocação ou sem participantes alocados → `DomainException` (400).
 
 ### Componente: Formatação do cabeçalho
 
@@ -178,7 +180,7 @@ backend/tests/CaronaAlvinegra.Domain.Tests/
 
 ## Testing Strategy
 
-- **ListaOficialServiceTests** (com fakes in-memory escritos à mão, sem pacote de mock — ver Spec 10): cabeçalho contém `LISTA OFICIAL` + código + adversário; responsável aparece primeiro com `( Resp)`; rodapé fixo presente; spin omitido quando não há.
+- **ListaOficialServiceTests** (com fakes in-memory escritos à mão, sem pacote de mock — ver Spec 10): cabeçalho contém `LISTA OFICIAL` + código + adversário; responsável aparece primeiro com `( Resp)`; responsável inexistente não marca; rodapé fixo presente; spin omitido quando não há e incluído quando há; jogo inexistente → `null`; sem alocação/sem participantes → `DomainException`; van com grupo excluído é omitida; limites de 15 (van) e 6 (spin) linhas.
 - **Build/test:** `dotnet build` e `dotnet test` com exit code 0.
 
 ## Migration / Rollback

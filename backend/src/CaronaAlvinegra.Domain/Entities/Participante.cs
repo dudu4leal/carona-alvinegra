@@ -11,15 +11,32 @@ public class Participante
 
     public Participante(string nome, string whatsApp, Guid grupoId)
     {
+        Id = Guid.NewGuid();
+        Nome = ValidarNome(nome);
+        WhatsApp = ValidarWhatsApp(whatsApp);
+        GrupoId = grupoId;
+    }
+
+    public void Atualizar(string nome, string whatsApp, Guid grupoId)
+    {
+        Nome = ValidarNome(nome);
+        WhatsApp = ValidarWhatsApp(whatsApp);
+        GrupoId = grupoId;
+    }
+
+    private static string ValidarNome(string nome)
+    {
         if (string.IsNullOrWhiteSpace(nome))
             throw new DomainException("Nome do participante é obrigatório.");
 
+        return nome.Trim();
+    }
+
+    private static string ValidarWhatsApp(string whatsApp)
+    {
         if (string.IsNullOrWhiteSpace(whatsApp))
             throw new DomainException("WhatsApp do participante é obrigatório.");
 
-        Id = Guid.NewGuid();
-        Nome = nome.Trim();
-        WhatsApp = whatsApp.Trim();
-        GrupoId = grupoId;
+        return whatsApp.Trim();
     }
 }

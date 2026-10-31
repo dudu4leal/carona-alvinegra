@@ -16,12 +16,23 @@ public class Grupo
 
     public Grupo(string nome, Rota rota)
     {
+        Id = Guid.NewGuid();
+        Nome = ValidarNome(nome);
+        Rota = rota;
+    }
+
+    public void Atualizar(string nome, Rota rota)
+    {
+        Nome = ValidarNome(nome);
+        Rota = rota;
+    }
+
+    private static string ValidarNome(string nome)
+    {
         if (string.IsNullOrWhiteSpace(nome))
             throw new DomainException("Nome do grupo é obrigatório.");
 
-        Id = Guid.NewGuid();
-        Nome = nome.Trim();
-        Rota = rota;
+        return nome.Trim();
     }
 
     public void AdicionarParticipante(Participante participante)
